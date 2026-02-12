@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Routine OS">
+    <link rel="manifest" href="/manifest.json">
     <title>Routine OS</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
@@ -15,49 +19,44 @@
         .header h1{font-size:18px;font-weight:600}.header .sub{font-size:13px;color:#9ca3af;margin-top:1px}
         .icon-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#a855f7;cursor:pointer;border-radius:6px;transition:background .2s}
         .icon-btn:hover{background:rgba(168,85,247,.1)}
-        .stats-bar{background:#0a0a0a;border-bottom:1px solid rgba(168,85,247,.2);padding:8px 16px;display:none}
-        .stats-inner{max-width:448px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px}
-        .stats-left{display:flex;align-items:center;gap:8px}
-        .progress-track{width:96px;height:4px;background:#111;border-radius:2px;overflow:hidden}
-        .progress-fill{height:100%;background:#a855f7;border-radius:2px;transition:width .3s}
-        .stats-pct{color:#a855f7;font-weight:600}
         .main{padding:16px;max-width:448px;margin:0 auto;padding-bottom:120px}
-        .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:55vh;text-align:center}
-        .empty svg{width:48px;height:48px;color:#4b5563;margin-bottom:16px}
-        .empty h2{font-size:18px;color:#d1d5db;margin-bottom:8px;font-weight:500}.empty p{font-size:14px;color:#6b7280}
-        .tl-item{border-left:1px solid #a855f7;padding-left:16px;padding-bottom:4px;position:relative;margin-bottom:16px}
-        .tl-item::before{content:'';position:absolute;width:8px;height:8px;background:#a855f7;border-radius:50%;left:-5px;top:8px}
-        .tl-item.done{opacity:.55}.tl-item.done::before{background:#22c55e}
-        .tl-item.skipped{opacity:.4}.tl-item.skipped::before{background:#ef4444}
+        .section{margin-bottom:24px}
+        .section-title{font-size:14px;font-weight:600;color:#d1d5db;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
         .card{background:#0a0a0a;border:1px solid #a855f7;border-radius:8px;padding:14px}
-        .card.done-card{border-color:rgba(34,197,94,.4)}.card.skip-card{border-color:rgba(239,68,68,.4)}
-        .ev-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-        .ev-meta{display:flex;align-items:center;gap:8px;font-size:13px;color:#a855f7}
-        .ev-time{color:#d8b4fe;font-weight:500}
-        .ev-title{font-size:15px;font-weight:500;margin-bottom:3px}
-        .ev-title.struck{text-decoration:line-through;color:#6b7280}
-        .ev-desc{font-size:13px;color:#9ca3af}
-        .badge{display:inline-block;font-size:11px;background:rgba(168,85,247,.15);color:#d8b4fe;padding:3px 7px;border-radius:4px}
-        .badge-done{background:rgba(34,197,94,.15);color:#4ade80}.badge-skip{background:rgba(239,68,68,.15);color:#f87171}
-        .ev-actions{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
-        .act-btns{display:flex;gap:8px}
-        .act-btn{min-height:36px;display:flex;align-items:center;gap:4px;padding:0 12px;font-size:12px;border-radius:6px;border:1px solid;cursor:pointer;transition:all .2s;background:#000;font-family:inherit}
-        .act-skip{border-color:rgba(239,68,68,.35);color:#f87171}.act-skip:hover{background:rgba(239,68,68,.1)}
-        .act-done{border-color:rgba(34,197,94,.35);color:#4ade80}.act-done:hover{background:rgba(34,197,94,.1)}
-        .del-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#4b5563;cursor:pointer;border-radius:4px}.del-btn:hover{color:#ef4444}
-        .fab-group{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;align-items:center;gap:10px;z-index:40}
-        .fab-sm{width:44px;height:44px;border-radius:50%;background:#0a0a0a;border:1px solid #a855f7;color:#a855f7;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-        .fab-sm:hover{background:rgba(168,85,247,.1)}
-        .fab-lg{width:56px;height:56px;border-radius:50%;background:#a855f7;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(168,85,247,.3);transition:background .2s}
-        .fab-lg:hover{background:#9333ea}
-        .spartan-alert{position:fixed;top:100px;left:16px;z-index:40;display:none;align-items:center;gap:8px;padding:8px 14px;background:rgba(127,29,29,.25);border:1px solid rgba(239,68,68,.35);border-radius:8px;cursor:pointer;animation:pulse 2s infinite}
-        .spartan-alert span{font-size:12px;color:#fca5a5;font-weight:500}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#a855f7;border:1px solid #a855f7;border-radius:8px;overflow:hidden}
+        .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+        .cal-nav{display:flex;align-items:center;gap:8px}
+        .cal-btn{padding:4px 8px;background:none;border:none;color:#a855f7;cursor:pointer;border-radius:4px;font-size:12px}
+        .cal-btn:hover{background:rgba(168,85,247,.1)}
+        .cal-day{aspect-square:display:flex;align-items:center;justify-content:center;font-size:13px;background:#000;cursor:pointer;transition:background .2s;position:relative}
+        .cal-day:hover{background:#111}
+        .cal-day.other-month{color:#4b5563}
+        .cal-day.today{background:#a855f7;color:#000;font-weight:600}
+        .cal-day.selected{background:#d8b4fe;color:#000}
+        .cal-day.has-events::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;background:#a855f7;border-radius:50%}
+        .weekday{font-size:11px;color:#9ca3af;text-align:center;padding:4px 0;background:#0a0a0a;font-weight:500}
+        .events-list{margin-top:12px;max-height:200px;overflow-y:auto}
+        .event-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(168,85,247,.2)}
+        .event-item:last-child{border-bottom:none}
+        .event-info{flex:1}
+        .event-time{font-size:12px;color:#a855f7;margin-bottom:2px}
+        .event-title{font-size:13px;color:#fff}
+        .event-type{font-size:10px;color:#6b7280}
+        .del-btn{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#4b5563;cursor:pointer;border-radius:4px}.del-btn:hover{color:#ef4444}
+        .metrics-grid{display:grid;grid-template-columns:1fr;gap:12px}
+        .metric-card{background:#0a0a0a;border:1px solid #a855f7;border-radius:8px;padding:12px}
+        .metric-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+        .metric-title{font-size:13px;font-weight:500;color:#fff}
+        .metric-value{font-size:14px;color:#a855f7;font-weight:600}
+        .metric-actions{display:flex;gap:8px;margin-top:8px}
+        .metric-btn{flex:1;padding:6px;background:none;border:1px solid #a855f7;color:#a855f7;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s}
+        .metric-btn:hover{background:rgba(168,85,247,.1)}
+        .metric-btn.done{background:#a855f7;color:#000}
         .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:50}
         .overlay.open{display:flex}
         .modal{background:#0a0a0a;border-top:1px solid #a855f7;width:100%;max-width:448px;border-radius:12px 12px 0 0;max-height:85vh;display:flex;flex-direction:column}
         .modal-head{padding:14px 16px;border-bottom:1px solid rgba(168,85,247,.2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-        .modal-head h2{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+        .modal-head h2{font-size:16px;font-weight:600}
         .modal-body{flex:1;overflow-y:auto;padding:16px}
         .modal-foot{padding:12px 16px;border-top:1px solid rgba(168,85,247,.2);flex-shrink:0}
         .close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#9ca3af;cursor:pointer}.close:hover{color:#fff}
@@ -71,258 +70,814 @@
         .fbtn{flex:1;padding:8px 14px;border-radius:8px;border:1px solid #a855f7;cursor:pointer;font-size:14px;font-weight:500;transition:all .2s;font-family:inherit;min-height:44px}
         .fbtn-c{background:#000;color:#d1d5db}.fbtn-c:hover{background:#111}
         .fbtn-s{background:#a855f7;color:#fff}.fbtn-s:hover{background:#9333ea}.fbtn-s:disabled{opacity:.5;cursor:not-allowed}
-        .mood-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
-        .mood-btn{display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:8px;border:1px solid rgba(168,85,247,.2);background:#000;cursor:pointer;transition:all .2s;font-family:inherit}
-        .mood-btn.on{border-color:#a855f7;background:rgba(168,85,247,.12)}
-        .mood-btn .emoji{font-size:22px;margin-bottom:2px}.mood-btn .mlabel{font-size:10px;color:#6b7280}
-        .mood-btn.on .mlabel{color:#d8b4fe}
-        .fb-card{background:#000;border-left:2px solid #a855f7;border-radius:0 8px 8px 0;padding:14px;margin-bottom:10px}
-        .fb-card.penalty{border-color:#ef4444}.fb-card.stoic{border-color:#f97316}.fb-card.reminder{border-color:#eab308}
-        .fb-tag{display:flex;align-items:center;gap:4px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px;color:#a855f7}
-        .fb-card.penalty .fb-tag{color:#f87171}.fb-card.stoic .fb-tag{color:#fb923c}.fb-card.reminder .fb-tag{color:#facc15}
-        .fb-text{font-size:13px;color:#e5e7eb;line-height:1.5}
-        .penalty-box{margin-top:8px;padding:6px 10px;background:rgba(127,29,29,.15);border:1px solid rgba(239,68,68,.25);border-radius:6px;font-size:11px;color:#fca5a5}
-        .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-        .chat-msg{max-width:85%;border-radius:8px;padding:10px 12px}
-        .msg-user{align-self:flex-end;background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.3)}
-        .msg-coach{align-self:flex-start;background:#000;border-left:2px solid #a855f7}
-        .msg-coach .sender{font-size:9px;color:#a855f7;text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:3px}
-        .msg-text{font-size:13px;color:#e5e7eb;line-height:1.5}
-        .msg-time{font-size:9px;color:#4b5563;text-align:right;margin-top:4px}
-        .chat-input-row{padding:12px 16px;border-top:1px solid rgba(168,85,247,.2);display:flex;gap:8px;flex-shrink:0}
-        .chat-input{flex:1;padding:8px 12px;background:#000;border:1px solid #a855f7;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;resize:none}
-        .chat-input:focus{outline:none;border-color:#d8b4fe}
-        .send-btn{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:#a855f7;border:none;border-radius:8px;color:#fff;cursor:pointer;transition:background .2s}
-        .send-btn:hover{background:#9333ea}.send-btn:disabled{opacity:.5;cursor:not-allowed}
-        .settings-panel{padding:12px 16px;border-bottom:1px solid rgba(168,85,247,.2);background:#050505;display:none}
-        .settings-panel.open{display:block}
-        .settings-panel p{font-size:11px;color:#6b7280;margin-bottom:8px}
-        .settings-row{display:flex;gap:8px}
+        .fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:#a855f7;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(168,85,247,.3);transition:background .2s;z-index:40}
+        .fab:hover{background:#9333ea}
+        .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;text-align:center;color:#6b7280}
+        .empty-state svg{width:32px;height:32px;margin-bottom:8px}
+        .empty-state p{font-size:12px}
+        .coach-section{background:#0a0a0a;border:1px solid #a855f7;border-radius:8px;overflow:hidden}
+        .coach-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(168,85,247,.2)}
+        .coach-label{font-size:14px;font-weight:600;color:#d1d5db;display:flex;align-items:center;gap:6px}
+        .coach-label svg{color:#a855f7}
+        .coach-status{font-size:10px;color:#6b7280;padding:2px 8px;border:1px solid rgba(168,85,247,.2);border-radius:4px}
+        .coach-log{max-height:300px;overflow-y:auto;padding:12px 14px}
+        .coach-msg{margin-bottom:12px;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.6;color:#e5e7eb}
+        .coach-msg.coach-resp{background:#000;border-left:2px solid #a855f7}
+        .coach-msg.coach-resp.harsh{border-left-color:#ef4444}
+        .coach-msg.coach-resp.motivate{border-left-color:#f59e0b}
+        .coach-msg.coach-resp.advice{border-left-color:#22c55e}
+        .coach-msg.user-cmd{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);text-align:right}
+        .coach-tag{font-size:9px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:4px;color:#a855f7}
+        .coach-msg.harsh .coach-tag{color:#f87171}
+        .coach-msg.motivate .coach-tag{color:#fbbf24}
+        .coach-msg.advice .coach-tag{color:#4ade80}
+        .coach-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(168,85,247,.2)}
+        .coach-input{flex:1;padding:8px 12px;background:#000;border:1px solid #a855f7;border-radius:8px;color:#fff;font-size:13px;font-family:inherit}
+        .coach-input:focus{outline:none;border-color:#d8b4fe}
+        .coach-send{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:#a855f7;border:none;border-radius:8px;color:#fff;cursor:pointer;transition:background .2s}
+        .coach-send:hover{background:#9333ea}
+        .coach-quick{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
+        .coach-quick-btn{padding:4px 10px;background:none;border:1px solid rgba(168,85,247,.3);color:#d8b4fe;border-radius:6px;font-size:11px;cursor:pointer;transition:all .2s;font-family:inherit}
+        .coach-quick-btn:hover{background:rgba(168,85,247,.1);border-color:#a855f7}
+        .feedback-banner{position:fixed;top:70px;left:16px;right:16px;max-width:416px;margin:0 auto;z-index:35;background:rgba(127,29,29,.4);border:2px solid #ef4444;border-radius:8px;padding:12px 16px;display:none;cursor:pointer;animation:pulse 2s infinite;box-shadow:0 4px 12px rgba(239,68,68,.3)}
+        .feedback-banner.show{display:flex;align-items:center;gap:10px}
+        .feedback-banner span{font-size:13px;color:#fef2f2;font-weight:600}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.8}}
+        .plugin-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(168,85,247,.2)}
+        .plugin-toggle:last-child{border-bottom:none}
+        .plugin-info{flex:1}
+        .plugin-name{font-size:14px;font-weight:500;color:#fff;margin-bottom:2px}
+        .plugin-desc{font-size:11px;color:#6b7280}
+        .toggle-switch{position:relative;width:48px;height:26px;background:#1f1f1f;border:1px solid #a855f7;border-radius:13px;cursor:pointer;transition:background .2s}
+        .toggle-switch.on{background:#a855f7}
+        .toggle-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s}
+        .toggle-switch.on .toggle-knob{left:24px}
     </style>
 </head>
 <body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-left">
+                <button class="icon-btn" onclick="openSettings()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+                <div>
+                    <h1 id="currentMonth">Loading...</h1>
+                    <div class="sub" id="selectedDate">Today</div>
+                </div>
+            </div>
+            <button class="icon-btn" onclick="goToToday()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+        </div>
+    </header>
 
-<header class="header"><div class="header-inner"><div class="header-left">
-    <button class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-    <div><h1>Today</h1><div class="sub" id="dateDisplay"></div></div>
-</div>
-<button class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg></button>
-</div></header>
+    <main class="main">
+        <!-- Calendar Section -->
+        <section class="section">
+            <div class="cal-header">
+                <h2 class="section-title">Calendar</h2>
+                <div class="cal-nav">
+                    <button class="cal-btn" onclick="previousMonth()">‹</button>
+                    <button class="cal-btn" onclick="nextMonth()">›</button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendar">
+                <!-- Calendar will be rendered here -->
+            </div>
+        </section>
 
-<div class="stats-bar" id="statsBar"><div class="stats-inner">
-    <div class="stats-left"><span id="statsText" style="color:#6b7280">0/0</span><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div><span class="stats-pct" id="statsPct">0%</span></div>
-    <span id="moodDisplay" style="color:#6b7280"></span>
-</div></div>
+        <!-- Events Section -->
+        <section class="section">
+            <h2 class="section-title">Events for <span id="eventsDate">Today</span></h2>
+            <div class="card">
+                <div class="events-list" id="eventsList">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/></svg>
+                        <p>No events for this day</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<div class="spartan-alert" id="spartanAlert" onclick="openFeedback()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span>The Spartan has words for you</span>
-</div>
+        <!-- Health Metrics Section -->
+        <section class="section">
+            <h2 class="section-title">Health Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Water Intake</span>
+                        <span class="metric-value" id="waterValue">0ml / 2000ml</span>
+                    </div>
+                    <div class="metric-actions">
+                        <button class="metric-btn" onclick="addWater(250)">+250ml</button>
+                        <button class="metric-btn" onclick="addWater(500)">+500ml</button>
+                        <button class="metric-btn" onclick="resetWater()">Reset</button>
+                    </div>
+                </div>
 
-<main class="main"><div id="timeline"></div></main>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Sleep Duration</span>
+                        <span class="metric-value" id="sleepValue">Not set</span>
+                    </div>
+                    <div class="metric-actions">
+                        <input type="number" class="fi" id="sleepInput" placeholder="Hours" min="0" max="24" step="0.5" style="flex:1">
+                        <button class="metric-btn" onclick="setSleep()">Set</button>
+                    </div>
+                </div>
 
-<div class="fab-group">
-    <button class="fab-sm" onclick="openMood()" title="Log Mood"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button class="fab-sm" onclick="openChat()" title="Talk to The Spartan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button class="fab-lg" onclick="openAddEvent()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/></svg></button>
-</div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Exercise</span>
+                        <span class="metric-value" id="exerciseValue">Not done</span>
+                    </div>
+                    <div class="metric-actions">
+                        <button class="metric-btn" id="exerciseBtn" onclick="toggleExercise()">Mark as Done</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Coach Section -->
+        <section class="section">
+            <h2 class="section-title">The Coach</h2>
+            <div class="coach-section">
+                <div class="coach-header">
+                    <div class="coach-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        The Spartan
+                    </div>
+                    <span class="coach-status" id="coachStatus">Active</span>
+                </div>
+                <div class="coach-log" id="coachLog"></div>
+                <div class="coach-quick">
+                    <button class="coach-quick-btn" onclick="coachCommand('motivate me')">Motivate</button>
+                    <button class="coach-quick-btn" onclick="coachCommand('sleep hygiene')">Sleep</button>
+                    <button class="coach-quick-btn" onclick="coachCommand('work density')">Work</button>
+                    <button class="coach-quick-btn" onclick="coachCommand('review metrics')">Review</button>
+                </div>
+                <div class="coach-input-row">
+                    <input type="text" class="coach-input" id="coachInput" placeholder="Command the Coach...">
+                    <button class="coach-send" onclick="sendCoachCommand()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2"/><polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
 
-<!-- ADD EVENT -->
-<div class="overlay" id="addModal"><div class="modal"><div class="modal-head"><h2>Add New Item</h2><button class="close" onclick="closeAll()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/></svg></button></div>
-<div class="modal-body"><form id="eventForm">
-    <div class="fg"><label class="fl">Title *</label><input class="fi" id="fTitle" placeholder="Enter title" required></div>
-    <div class="fg"><label class="fl">Description</label><textarea class="ft" id="fDesc" placeholder="Optional"></textarea></div>
-    <div class="fg"><label class="fl">Time</label><input type="time" class="fi" id="fTime"></div>
-    <div class="fg"><label class="fl">Type</label><div class="type-grid">
-        <button type="button" class="tbtn on" data-t="onetime" onclick="pickType(this)">One-time</button>
-        <button type="button" class="tbtn" data-t="recurring" onclick="pickType(this)">Daily</button>
-    </div></div>
-    <div class="form-acts"><button type="button" class="fbtn fbtn-c" onclick="closeAll()">Cancel</button><button type="submit" class="fbtn fbtn-s">Add</button></div>
-</form></div></div></div>
+    <!-- Feedback Banner -->
+    <div class="feedback-banner" id="feedbackBanner" onclick="dismissFeedback()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="feedbackBannerText">The Coach has words for you.</span>
+    </div>
 
-<!-- MOOD -->
-<div class="overlay" id="moodModal"><div class="modal"><div class="modal-head"><h2>How are you feeling?</h2><button class="close" onclick="closeAll()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/></svg></button></div>
-<div class="modal-body">
-    <p style="font-size:12px;color:#6b7280;margin-bottom:12px">Be honest. The Spartan doesn't care about your comfort — but needs the data.</p>
-    <div class="mood-grid" id="moodGrid"></div>
-    <div class="fg"><label class="fl">Note (optional)</label><textarea class="ft" id="moodNote" placeholder="What's going on?" rows="2"></textarea></div>
-    <div class="form-acts"><button class="fbtn fbtn-c" onclick="closeAll()">Cancel</button><button class="fbtn fbtn-s" id="moodSubmit" onclick="submitMood()" disabled>Log Mood</button></div>
-</div></div></div>
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="openAddEvent()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/></svg>
+    </button>
 
-<!-- FEEDBACK -->
-<div class="overlay" id="feedbackModal"><div class="modal"><div class="modal-head"><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Daily Debrief</h2><button class="close" onclick="closeAll()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/></svg></button></div>
-<div class="modal-body" id="feedbackBody"></div>
-<div class="modal-foot"><button class="fbtn fbtn-s" style="width:100%" onclick="closeAll()">Acknowledged</button></div></div></div>
+    <!-- Add Event Modal -->
+    <div class="overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h2>Add Event</h2>
+                <button class="close" onclick="closeAll()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="fg"><label class="fl">Title *</label><input class="fi" id="eventTitle" placeholder="Enter title" required></div>
+                    <div class="fg"><label class="fl">Description</label><textarea class="ft" id="eventDesc" placeholder="Optional"></textarea></div>
+                    <div class="fg"><label class="fl">Time</label><input type="time" class="fi" id="eventTime"></div>
+                    <div class="fg"><label class="fl">Type</label>
+                        <div class="type-grid">
+                            <button type="button" class="tbtn on" data-type="onetime" onclick="pickEventType(this)">One-time</button>
+                            <button type="button" class="tbtn" data-type="recurring" onclick="pickEventType(this)">Daily</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-foot">
+                <button class="fbtn fbtn-c" onclick="closeAll()">Cancel</button>
+                <button class="fbtn fbtn-s" onclick="saveEvent()">Add Event</button>
+            </div>
+        </div>
+    </div>
 
-<!-- CHAT -->
-<div class="overlay" id="chatModal"><div class="modal" style="height:90vh"><div class="modal-head"><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>The Spartan <span style="font-size:10px;color:#6b7280;font-weight:400;margin-left:4px" id="chatMode">Local Mode</span></h2>
-<div style="display:flex;gap:2px">
-    <button class="icon-btn" style="width:32px;height:32px" onclick="toggleSettings()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/></svg></button>
-    <button class="icon-btn" style="width:32px;height:32px" onclick="clearChat()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/></svg></button>
-    <button class="close" onclick="closeAll()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/></svg></button>
-</div></div>
-<div class="settings-panel" id="settingsPanel">
-    <p>Optional. Without an API key, The Spartan uses pre-built local responses. With one, a high-reasoning LLM powers the coach.</p>
-    <div class="settings-row"><input type="password" class="fi" id="apiKeyInput" placeholder="sk-..." style="font-size:12px"><button class="fbtn fbtn-s" style="flex:0;padding:0 14px;font-size:12px" onclick="saveApiKey()">Save</button></div>
-</div>
-<div class="chat-area" id="chatArea"></div>
-<div class="chat-input-row"><textarea class="chat-input" id="chatInput" placeholder="Speak. No excuses." rows="1"></textarea>
-<button class="send-btn" onclick="sendChat()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2"/><polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" fill="none"/></svg></button>
-</div></div></div>
+    <!-- Settings Modal -->
+    <div class="overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h2>Settings</h2>
+                <button class="close" onclick="closeAll()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <h3 style="font-size:14px;font-weight:600;color:#d1d5db;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Health Plugins</h3>
+                <div id="pluginToggles"></div>
+            </div>
+        </div>
+    </div>
 
-<script>
-let events=[], completionLog={}, currentMood=null, chatHistory=[], selectedType='onetime', selectedMood=null;
-let apiKey=localStorage.getItem('ros-api-key')||'';
+    <script>
+        // State Management
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let events = [];
+        let metrics = {
+            water: { current: 0, target: 2000 },
+            sleep: { hours: null },
+            exercise: { done: false }
+        };
+        let selectedEventType = 'onetime';
+        let enabledPlugins = { water: true, sleep: true, exercise: true };
 
-const MOODS=[{v:'terrible',e:'💀',l:'Terrible'},{v:'bad',e:'😤',l:'Bad'},{v:'neutral',e:'😐',l:'Neutral'},{v:'good',e:'🔥',l:'Good'},{v:'great',e:'⚡',l:'Great'}];
-const PENALTIES=[
-    {task:'50 burpees. Now.',d:'10 min',i:'high'},
-    {task:'100 pushups. No breaks longer than 10 seconds.',d:'8 min',i:'high'},
-    {task:'2 minute cold shower. Full cold.',d:'2 min',i:'high'},
-    {task:'5 minute plank. Collapse = restart that minute.',d:'5 min',i:'high'},
-    {task:'200 jumping jacks. Count every one.',d:'8 min',i:'medium'},
-    {task:'Write 500 words on why you failed. No excuses — only analysis.',d:'15 min',i:'mental'},
-    {task:'Tomorrow starts at 5 AM. Non-negotiable. Set the alarm now.',d:'next day',i:'schedule'},
-];
-const STOICS=[
-    '"The impediment to action advances action. What stands in the way becomes the way." — Marcus Aurelius',
-    '"We suffer more in imagination than in reality." — Seneca',
-    '"You have power over your mind — not outside events." — Marcus Aurelius',
-    '"Waste no more time arguing about what a good man should be. Be one." — Marcus Aurelius',
-    '"Difficulties strengthen the mind, as labor does the body." — Seneca',
-    '"First say to yourself what you would be; then do what you have to do." — Epictetus',
-];
-const SYS_PROMPT='You are "The Spartan" — an extremely harsh, direct, zero-tolerance AI coach. Brutal honesty. Short, punchy sentences. You despise excuses. If someone skips a task, call it out HARD. You are PRACTICAL — optimize for maximum density of effort within real constraints. Assign penalty tasks when tasks are skipped. For bad moods, channel Stoic philosophy — acknowledge pain, demand action. Never soft. 2-4 sentences for feedback, slightly longer for chat.';
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            renderCalendar();
+            updateDateDisplay();
+            renderEvents();
+            updateMetrics();
+        });
 
-function rand(a){return a[Math.floor(Math.random()*a.length)]}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function fmtTime(t){if(!t)return '';const[h,m]=t.split(':');const hr=+h;return `${hr%12||12}:${m} ${hr>=12?'PM':'AM'}`}
-function fmtNow(){const d=new Date();return `${d.getHours()%12||12}:${d.getMinutes().toString().padStart(2,'0')} ${d.getHours()>=12?'PM':'AM'}`}
+        // Data Persistence
+        function loadData() {
+            const storedEvents = localStorage.getItem('routine-os-events');
+            const storedMetrics = localStorage.getItem('routine-os-metrics');
+            const storedPlugins = localStorage.getItem('routine-os-plugins');
+            
+            if (storedEvents) events = JSON.parse(storedEvents);
+            if (storedMetrics) metrics = JSON.parse(storedMetrics);
+            if (storedPlugins) enabledPlugins = JSON.parse(storedPlugins);
+        }
 
-document.getElementById('dateDisplay').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+        function saveData() {
+            localStorage.setItem('routine-os-events', JSON.stringify(events));
+            localStorage.setItem('routine-os-metrics', JSON.stringify(metrics));
+            localStorage.setItem('routine-os-plugins', JSON.stringify(enabledPlugins));
+        }
 
-function getStats(){
-    let c=0,sk=0,p=0,skT=[];
-    events.forEach(e=>{const s=completionLog[e.id];if(s==='completed')c++;else if(s==='skipped'){sk++;skT.push(e)}else p++});
-    const t=events.length,r=t?Math.round(c/t*100):0;
-    return{total:t,completed:c,skipped:sk,pending:p,skippedTasks:skT,rate:r};
-}
-function renderStats(){
-    const s=getStats(),bar=document.getElementById('statsBar');
-    if(!s.total){bar.style.display='none';document.getElementById('spartanAlert').style.display='none';return}
-    bar.style.display='block';
-    document.getElementById('statsText').textContent=`${s.completed}/${s.total} done`;
-    document.getElementById('progressFill').style.width=s.rate+'%';
-    document.getElementById('statsPct').textContent=s.rate+'%';
-    document.getElementById('moodDisplay').textContent=currentMood?`Mood: ${currentMood}`:'';
-    document.getElementById('spartanAlert').style.display=s.skipped>0?'flex':'none';
-}
-function renderTimeline(){
-    const el=document.getElementById('timeline');
-    if(!events.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/></svg><h2>No events yet</h2><p>Tap the + button to add your first event or task</p></div>';renderStats();return}
-    const sorted=[...events].sort((a,b)=>{const sa=completionLog[a.id]||'pending',sb=completionLog[b.id]||'pending',o={pending:0,skipped:1,completed:2};if(o[sa]!==o[sb])return o[sa]-o[sb];return(a.time||'').localeCompare(b.time||'')});
-    el.innerHTML=sorted.map(e=>{
-        const st=completionLog[e.id]||'pending';
-        return`<div class="tl-item ${st==='completed'?'done':st==='skipped'?'skipped':''}"><div class="card ${st==='completed'?'done-card':st==='skipped'?'skip-card':''}">
-        <div class="ev-head"><div class="ev-meta">${e.time?`<span class="ev-time">${fmtTime(e.time)}</span>`:''}${st==='completed'?'<span class="badge badge-done">Done</span>':''}${st==='skipped'?'<span class="badge badge-skip">Skipped</span>':''}</div>
-        <button class="del-btn" onclick="delEvent('${e.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/></svg></button></div>
-        <div class="ev-title ${st==='completed'?'struck':''}">${esc(e.title)}</div>
-        ${e.description?`<div class="ev-desc">${esc(e.description)}</div>`:''}
-        <div class="ev-actions"><div>${e.type==='recurring'?'<span class="badge">Daily</span>':''}</div>
-        ${st==='pending'?`<div class="act-btns"><button class="act-btn act-skip" onclick="skipEvent('${e.id}')">Skip</button><button class="act-btn act-done" onclick="completeEvent('${e.id}')">Done</button></div>`:''}</div>
-        </div></div>`;
-    }).join('');
-    renderStats();
-}
-function addEvent(d){events.push({id:Date.now().toString(),...d});renderTimeline()}
-function delEvent(id){events=events.filter(e=>e.id!==id);delete completionLog[id];renderTimeline()}
-function completeEvent(id){completionLog[id]='completed';renderTimeline()}
-function skipEvent(id){completionLog[id]='skipped';renderTimeline()}
+        // Calendar Functions
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const prevLastDay = new Date(year, month, 0);
+            const startDay = firstDay.getDay();
+            const endDay = lastDay.getDate();
+            const prevEndDay = prevLastDay.getDate();
 
-function closeAll(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'))}
-function openAddEvent(){closeAll();document.getElementById('addModal').classList.add('open');document.getElementById('fTitle').focus()}
-function openMood(){closeAll();selectedMood=null;renderMoodGrid();document.getElementById('moodNote').value='';document.getElementById('moodSubmit').disabled=true;document.getElementById('moodModal').classList.add('open')}
-function openFeedback(){closeAll();renderFeedback();document.getElementById('feedbackModal').classList.add('open')}
-function openChat(){closeAll();renderChatHistory();document.getElementById('chatModal').classList.add('open');document.getElementById('chatMode').textContent=apiKey?'LLM Connected':'Local Mode';document.getElementById('chatInput').focus()}
-document.querySelectorAll('.overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)closeAll()})});
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
 
-function pickType(btn){selectedType=btn.dataset.t;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on')}
-document.getElementById('eventForm').addEventListener('submit',e=>{
-    e.preventDefault();const t=document.getElementById('fTitle').value.trim();if(!t)return;
-    addEvent({title:t,description:document.getElementById('fDesc').value.trim(),time:document.getElementById('fTime').value,type:selectedType});
-    document.getElementById('eventForm').reset();selectedType='onetime';document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('on',b.dataset.t==='onetime'));closeAll();
-});
+            let html = '';
+            
+            // Weekday headers
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                html += `<div class="weekday">${day}</div>`;
+            });
 
-function renderMoodGrid(){document.getElementById('moodGrid').innerHTML=MOODS.map(m=>`<button type="button" class="mood-btn ${selectedMood===m.v?'on':''}" onclick="pickMood('${m.v}')"><span class="emoji">${m.e}</span><span class="mlabel">${m.l}</span></button>`).join('')}
-function pickMood(v){selectedMood=v;renderMoodGrid();document.getElementById('moodSubmit').disabled=false}
-function submitMood(){if(!selectedMood)return;currentMood=selectedMood;renderStats();closeAll()}
+            // Previous month days
+            for (let i = startDay - 1; i >= 0; i--) {
+                html += `<div class="cal-day other-month">${prevEndDay - i}</div>`;
+            }
 
-function generateFeedback(){
-    const s=getStats(),msgs=[];
-    if(!s.total)return[{type:'feedback',text:"You have zero tasks scheduled. That's not discipline — that's hiding. Build your day or your day builds you."}];
-    if(s.rate===100)msgs.push({type:'feedback',text:"All tasks completed. Acceptable. Don't let this make you comfortable — that's where decay starts. Raise the bar tomorrow."});
-    else if(s.rate>=80)msgs.push({type:'feedback',text:`${s.rate}% completion. Almost. "Almost" is the language of people who don't finish. Close the gap.`});
-    else if(s.rate>=50)msgs.push({type:'feedback',text:`${s.rate}%. Half-measures. You showed up for half your life today. The other half? Wasted. Unacceptable.`});
-    else if(s.completed>0)msgs.push({type:'feedback',text:`${s.rate}% completion. Pathetic. ${s.total} tasks and you couldn't handle ${s.total-s.completed}. What were you doing?`});
-    else if(s.skipped>0)msgs.push({type:'feedback',text:`Zero completions. ${s.skipped} skipped. You didn't have a bad day — you chose to fail. Every skip was a decision. Own it.`});
-    s.skippedTasks.forEach(t=>{const p=rand(PENALTIES);msgs.push({type:'penalty',text:`You skipped "${t.title}." No excuse given. Penalty: ${p.task}`,penalty:p})});
-    if(currentMood&&(currentMood==='bad'||currentMood==='terrible'))msgs.push({type:'stoic',text:`You feel "${currentMood}." Good — you're aware. Pain is information, not permission to quit. ${rand(STOICS)} Your feelings are valid. Your excuses are not. Move.`});
-    else if(currentMood==='neutral')msgs.push({type:'stoic',text:'"Neutral" is comfortable mediocrity dressed as stability. Find the edge and push past it.'});
-    if(s.pending>0)msgs.push({type:'reminder',text:`${s.pending} task${s.pending>1?'s':''} still pending. The day isn't over. You still have time to not be a disappointment. Execute.`});
-    return msgs.length?msgs:[{type:'feedback',text:"I'm watching. Don't give me a reason to be disappointed."}];
-}
-function renderFeedback(){
-    const tags={feedback:'The Spartan',penalty:'Penalty',stoic:'Stoic Fire',reminder:'Reminder'};
-    document.getElementById('feedbackBody').innerHTML=generateFeedback().map(f=>`<div class="fb-card ${f.type}"><div class="fb-tag">${tags[f.type]}</div><div class="fb-text">${f.text}</div>${f.penalty?`<div class="penalty-box">${f.penalty.d} — Intensity: ${f.penalty.i}</div>`:''}</div>`).join('');
-}
+            // Current month days
+            const today = new Date();
+            for (let day = 1; day <= endDay; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = formatDateKey(date);
+                const dayEvents = events.filter(e => e.date === dateStr);
+                const isToday = date.toDateString() === today.toDateString();
+                const isSelected = date.toDateString() === selectedDate.toDateString();
+                
+                let classes = 'cal-day';
+                if (isToday) classes += ' today';
+                if (isSelected) classes += ' selected';
+                if (dayEvents.length > 0) classes += ' has-events';
+                
+                html += `<div class="${classes}" onclick="selectDate(${year}, ${month}, ${day})">${day}</div>`;
+            }
 
-function renderChatHistory(){
-    if(!chatHistory.length)chatHistory=[{role:'coach',text:"I'm The Spartan. I don't do pleasantries. Show me your schedule, tell me your excuses, or ask me what to do. But don't waste my time.",time:fmtNow()}];
-    document.getElementById('chatArea').innerHTML=chatHistory.map(m=>{
-        if(m.role==='user')return`<div class="chat-msg msg-user"><div class="msg-text">${esc(m.text)}</div><div class="msg-time">${m.time}</div></div>`;
-        return`<div class="chat-msg msg-coach"><div class="sender">SPARTAN</div><div class="msg-text">${esc(m.text)}</div><div class="msg-time">${m.time}</div></div>`;
-    }).join('');
-    const ca=document.getElementById('chatArea');ca.scrollTop=ca.scrollHeight;
-}
-function clearChat(){chatHistory=[{role:'coach',text:"Clean slate. But erasing the conversation doesn't erase what you did or didn't do. Now talk.",time:fmtNow()}];renderChatHistory()}
-function toggleSettings(){document.getElementById('settingsPanel').classList.toggle('open');document.getElementById('apiKeyInput').value=apiKey}
-function saveApiKey(){apiKey=document.getElementById('apiKeyInput').value.trim();localStorage.setItem('ros-api-key',apiKey);document.getElementById('settingsPanel').classList.remove('open');document.getElementById('chatMode').textContent=apiKey?'LLM Connected':'Local Mode'}
+            // Next month days
+            const remainingDays = 42 - (startDay + endDay);
+            for (let day = 1; day <= remainingDays; day++) {
+                html += `<div class="cal-day other-month">${day}</div>`;
+            }
 
-function localReply(msg){
-    const s=getStats(),m=msg.toLowerCase();
-    if(m.includes('tired')||m.includes('exhaust')||m.includes("can't"))return`"Tired" is not a status — it's announcing weakness. ${rand(STOICS)} ${s.pending} tasks left. Start the next one in 60 seconds or tiredness wins.`;
-    if(m.includes('skip')||m.includes('postpone')||m.includes('later')){const p=rand(PENALTIES);return`Postpone? That's quitting with extra steps. Penalty: ${p.task}`}
-    if(m.includes('feel')||m.includes('bad')||m.includes('sad'))return`Your feelings are real. Also irrelevant to execution. ${rand(STOICS)} Pain is the fee for a life worth living. Work.`;
-    if(m.includes('good')||m.includes('great'))return`Feeling good is not an achievement. Use it. ${s.pending} pending — move while momentum is there.`;
-    if(m.includes('help')||m.includes('advice'))return s.pending>0?`Stop asking. Start doing. ${s.pending} items remain. Hardest one first.`:'Add harder tasks. If everything is comfortable, your bar is too low.';
-    if(m.includes('done')||m.includes('finish'))return s.rate===100?"Acceptable. Don't celebrate baseline. Tomorrow should be harder.":`"Done"? ${s.rate}% completion. You quit. Get back in there.`;
-    if(s.skipped>0)return`You're chatting instead of executing. ${s.skipped} skipped tasks haunt your record. Go fix that.`;
-    return`I don't do small talk. ${s.pending} pending, ${s.rate}% rate. Action is the only currency I accept. What are you going to DO?`;
-}
-async function sendChat(){
-    const input=document.getElementById('chatInput'),text=input.value.trim();if(!text)return;input.value='';
-    chatHistory.push({role:'user',text,time:fmtNow()});renderChatHistory();
-    if(apiKey){
-        try{
-            const s=getStats(),ctx=`Schedule: ${s.total} tasks, ${s.completed} done, ${s.skipped} skipped, ${s.pending} pending. Rate: ${s.rate}%. Mood: ${currentMood||'not logged'}.`;
-            const msgs=[{role:'system',content:SYS_PROMPT},{role:'system',content:ctx}];
-            chatHistory.filter(m=>m.role).slice(-16).forEach(m=>msgs.push({role:m.role==='coach'?'assistant':'user',content:m.text}));
-            const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:'gpt-4o',messages:msgs,temperature:.8,max_tokens:250})});
-            if(res.ok){const d=await res.json(),t=d.choices?.[0]?.message?.content;if(t){chatHistory.push({role:'coach',text:t,time:fmtNow()});renderChatHistory();return}}
-        }catch(e){console.error(e)}
-    }
-    chatHistory.push({role:'coach',text:localReply(text),time:fmtNow()});renderChatHistory();
-}
-document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
+            document.getElementById('calendar').innerHTML = html;
+        }
 
-renderTimeline();
-setTimeout(()=>{
-    addEvent({title:'Morning Run',description:'5K minimum. No walking.',time:'06:30',type:'recurring'});
-    addEvent({title:'Deep Work Block',description:'3 hours focused work, no distractions',time:'09:00',type:'recurring'});
-    addEvent({title:'Team Standup',description:'Daily sync with the team',time:'12:00',type:'recurring'});
-    addEvent({title:'Project Review',description:'Review Routine OS progress',time:'15:00',type:'onetime'});
-    addEvent({title:'Evening Reading',description:'30 min non-fiction',time:'21:00',type:'recurring'});
-},300);
-</script>
+        function selectDate(year, month, day) {
+            selectedDate = new Date(year, month, day);
+            updateDateDisplay();
+            renderEvents();
+            renderCalendar();
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentDate = new Date(today);
+            selectedDate = new Date(today);
+            updateDateDisplay();
+            renderCalendar();
+            renderEvents();
+        }
+
+        function updateDateDisplay() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('selectedDate').textContent = selectedDate.toLocaleDateString('en-US', options);
+            document.getElementById('eventsDate').textContent = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // Events Functions
+        function renderEvents() {
+            const dateStr = formatDateKey(selectedDate);
+            const dayEvents = events.filter(e => e.date === dateStr);
+            const container = document.getElementById('eventsList');
+
+            if (dayEvents.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/></svg>
+                        <p>No events for this day</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = dayEvents.map(event => `
+                <div class="event-item">
+                    <div class="event-info">
+                        ${event.time ? `<div class="event-time">${event.time}</div>` : ''}
+                        <div class="event-title">${event.title}</div>
+                        ${event.description ? `<div class="event-type">${event.description}</div>` : ''}
+                        ${event.type === 'recurring' ? '<div class="event-type">Daily</div>' : ''}
+                    </div>
+                    <button class="del-btn" onclick="deleteEvent('${event.id}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openAddEvent() {
+            document.getElementById('addModal').classList.add('open');
+            document.getElementById('eventTitle').focus();
+        }
+
+        function closeAll() {
+            document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+            document.getElementById('eventForm').reset();
+            selectedEventType = 'onetime';
+            document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('on'));
+            document.querySelector('.tbtn[data-type="onetime"]').classList.add('on');
+        }
+
+        function pickEventType(btn) {
+            selectedEventType = btn.dataset.type;
+            document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+        }
+
+        function saveEvent() {
+            const title = document.getElementById('eventTitle').value.trim();
+            if (!title) return;
+
+            const event = {
+                id: Date.now().toString(),
+                title,
+                description: document.getElementById('eventDesc').value.trim(),
+                time: document.getElementById('eventTime').value,
+                type: selectedEventType,
+                date: formatDateKey(selectedDate)
+            };
+
+            events.push(event);
+            saveData();
+            renderEvents();
+            renderCalendar();
+            closeAll();
+        }
+
+        function deleteEvent(id) {
+            events = events.filter(e => e.id !== id);
+            saveData();
+            renderEvents();
+            renderCalendar();
+        }
+
+        // Health Metrics Functions
+        function renderMetrics() {
+            const container = document.querySelector('.metrics-grid');
+            let html = '';
+
+            if (enabledPlugins.water) {
+                const waterPercent = Math.round((metrics.water.current / metrics.water.target) * 100);
+                html += `
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Water Intake</span>
+                            <span class="metric-value">${metrics.water.current}ml / ${metrics.water.target}ml</span>
+                        </div>
+                        <div class="metric-actions">
+                            <button class="metric-btn" onclick="addWater(250)">+250ml</button>
+                            <button class="metric-btn" onclick="addWater(500)">+500ml</button>
+                            <button class="metric-btn" onclick="resetWater()">Reset</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (enabledPlugins.sleep) {
+                html += `
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Sleep Duration</span>
+                            <span class="metric-value">${metrics.sleep.hours ? metrics.sleep.hours + ' hours' : 'Not set'}</span>
+                        </div>
+                        <div class="metric-actions">
+                            <input type="number" class="fi" id="sleepInput" placeholder="Hours" min="0" max="24" step="0.5" style="flex:1">
+                            <button class="metric-btn" onclick="setSleep()">Set</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (enabledPlugins.exercise) {
+                html += `
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Exercise</span>
+                            <span class="metric-value">${metrics.exercise.done ? 'Done ✅' : 'Not done'}</span>
+                        </div>
+                        <div class="metric-actions">
+                            <button class="metric-btn ${metrics.exercise.done ? 'done' : ''}" onclick="toggleExercise()">${metrics.exercise.done ? 'Mark as Not Done' : 'Mark as Done'}</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (html === '') {
+                html = '<div style="padding:20px;text-align:center;color:#4b5563;font-size:12px">No health plugins enabled. Enable them in Settings.</div>';
+            }
+
+            container.innerHTML = html;
+
+            // Re-attach sleep input listener if sleep plugin is enabled
+            if (enabledPlugins.sleep) {
+                const sleepInput = document.getElementById('sleepInput');
+                if (sleepInput) {
+                    sleepInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') setSleep();
+                    });
+                }
+            }
+        }
+
+        function updateMetrics() {
+            renderMetrics();
+        }
+
+        function addWater(amount) {
+            metrics.water.current = Math.min(metrics.water.current + amount, metrics.water.target);
+            saveData();
+            updateMetrics();
+        }
+
+        function resetWater() {
+            metrics.water.current = 0;
+            saveData();
+            updateMetrics();
+        }
+
+        function setSleep() {
+            const hours = parseFloat(document.getElementById('sleepInput').value);
+            if (hours && hours >= 0 && hours <= 24) {
+                metrics.sleep.hours = hours;
+                saveData();
+                updateMetrics();
+                document.getElementById('sleepInput').value = '';
+            }
+        }
+
+        function toggleExercise() {
+            metrics.exercise.done = !metrics.exercise.done;
+            saveData();
+            updateMetrics();
+        }
+
+        // Plugin System
+        const AVAILABLE_PLUGINS = [
+            { id: 'water', name: 'Water Tracker', description: 'Track daily water intake (2000ml target)' },
+            { id: 'sleep', name: 'Sleep Tracker', description: 'Log sleep duration for metric reviews' },
+            { id: 'exercise', name: 'Exercise Tracker', description: 'Mark daily workout completion' }
+        ];
+
+        function renderPluginToggles() {
+            const container = document.getElementById('pluginToggles');
+            container.innerHTML = AVAILABLE_PLUGINS.map(plugin => `
+                <div class="plugin-toggle">
+                    <div class="plugin-info">
+                        <div class="plugin-name">${plugin.name}</div>
+                        <div class="plugin-desc">${plugin.description}</div>
+                    </div>
+                    <div class="toggle-switch ${enabledPlugins[plugin.id] ? 'on' : ''}" onclick="togglePlugin('${plugin.id}')">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function togglePlugin(pluginId) {
+            enabledPlugins[pluginId] = !enabledPlugins[pluginId];
+            saveData();
+            renderPluginToggles();
+            renderMetrics();
+        }
+
+        // Settings
+        function openSettings() {
+            renderPluginToggles();
+            document.getElementById('settingsModal').classList.add('open');
+        }
+
+        // Utility Functions
+        function formatDateKey(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // Close modals on overlay click
+        document.querySelectorAll('.overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeAll();
+            });
+        });
+
+        // ============================================================
+        // COACH ENGINE
+        // ============================================================
+
+        let coachLog = [];
+        let lastFeedbackHour = -1;
+
+        const MOTIVATIONAL_STORIES = [
+            { title: 'Leonidas at Thermopylae', text: '480 BC. 300 Spartans held the pass at Thermopylae against 100,000+ Persians for three days. Leonidas knew it was a suicide mission before he marched. When told Persian arrows would block out the sun, Dienekes replied: "Then we shall fight in the shade." They didn\'t fight because they could win. They fought because standing your ground is what separates men from cowards. What\'s your Thermopylae today? Face it.' },
+            { title: 'Marcus Aurelius — Emperor Under Plague', text: 'Marcus Aurelius ruled Rome during the Antonine Plague that killed 5 million. He didn\'t retreat. He sold palace furniture to fund the army rather than raise taxes. He wrote Meditations — not for publication, but as self-discipline notes. "The impediment to action advances action. What stands in the way becomes the way." He governed an empire while writing philosophy at 4 AM. You can\'t handle your schedule?' },
+            { title: 'Seneca\'s Exile', text: 'Seneca was exiled to Corsica for 8 years. No wealth, no status, no comfort. Instead of breaking, he wrote some of the most important philosophy in human history. "We suffer more in imagination than in reality." He returned to Rome and became the most powerful advisor in the empire. Your discomfort is not exile. It\'s training. Use it.' },
+            { title: 'Epictetus — From Slave to Philosopher', text: 'Epictetus was born a slave. His master broke his leg. He couldn\'t choose his circumstances — but he chose his response. He became the most influential Stoic teacher in Rome. "It\'s not what happens to you, but how you react to it that matters." You have freedom he never had. What\'s your excuse for not using it?' },
+            { title: 'Cato\'s March Through the Desert', text: 'Cato the Younger marched his army through the Libyan desert — 1,000 miles on foot. No horses for him. He walked with his men, drank last, ate last. When offered water before his soldiers, he refused: "A leader drinks after his men." Discipline isn\'t convenient. It\'s a standard you hold when no one is watching.' },
+            { title: 'The Spartan Boy and the Fox', text: 'A Spartan boy stole a fox and hid it under his cloak. Rather than reveal the theft when caught, he let the fox claw his stomach open. He died without making a sound. Extreme? Yes. But the principle stands: endure discomfort silently. Stop announcing your struggles. Handle them.' },
+            { title: 'Hannibal Crossing the Alps', text: '218 BC. Hannibal took 30,000 soldiers, 15,000 horses, and 37 war elephants across the Alps in winter. Half his army died. He did it anyway and defeated Rome on their own soil for 15 years. "We will either find a way, or make one." Your obstacle is not the Alps. It\'s your own weakness. Move.' },
+            { title: 'Miyamoto Musashi — 61 Duels, Zero Losses', text: 'Musashi fought his first duel at 13. By 30, he had fought 61 duels and never lost. His secret? "Do nothing that is of no use." He eliminated all wasted motion, all wasted thought. Every action had purpose. Examine your day: how much of it is wasted motion? Cut it. Ruthlessly.' },
+            { title: 'Diogenes and Alexander', text: 'Alexander the Great visited Diogenes, who lived in a barrel. "Ask me for anything," said the most powerful man alive. Diogenes replied: "Stand out of my sunlight." He needed nothing from the conqueror of the world. Real strength isn\'t accumulation — it\'s the elimination of dependency. What are you dependent on that you shouldn\'t be?' },
+            { title: 'Stockdale Paradox', text: 'Admiral James Stockdale spent 7 years as a POW in Vietnam. Tortured repeatedly. The optimists — "We\'ll be out by Christmas" — broke first. Stockdale survived by confronting brutal reality while maintaining faith in the outcome. "You must never confuse faith that you will prevail with the discipline to confront the most brutal facts." Stop hoping. Start acting.' }
+        ];
+
+        const ADVICE_DATABASE = {
+            'sleep hygiene': {
+                title: 'SLEEP HYGIENE — Non-Negotiable Protocol',
+                checklist: [
+                    'No screens 60 minutes before bed. Blue light destroys melatonin. No exceptions.',
+                    'Room temperature: 18-19°C (65-67°F). Your body needs to cool down to sleep.',
+                    'Total darkness. Blackout curtains or eye mask. Any light = degraded sleep.',
+                    'No caffeine after 2:00 PM. Half-life is 5-6 hours. Do the math.',
+                    'Last meal 3 hours before bed. Digestion and sleep don\'t mix.',
+                    'Wake time is non-negotiable. Same time every day including weekends.',
+                    'Bed is for sleep only. No phone, no laptop, no TV in bed.'
+                ],
+                suggestion: 'Move your wake-up time to 5:00 AM. Your body adapts in 4 days. The first 3 days will hurt. That\'s the point — you\'re building discipline, not comfort.'
+            },
+            'work density': {
+                title: 'WORK DENSITY — Maximum Output Protocol',
+                checklist: [
+                    'Time-block in 90-minute deep work sprints. No multitasking.',
+                    'Phone in another room during work blocks. Not on silent — physically removed.',
+                    'First work block starts within 30 min of waking. Peak cortisol = peak focus.',
+                    'Batch all communication (email, Slack) into 2 windows: 11 AM and 4 PM.',
+                    'Define 3 MIT (Most Important Tasks) the night before. Non-negotiable.',
+                    'No meetings before noon. Protect your cognitive prime time.',
+                    'Track deep work hours daily. If it\'s under 4 hours, you\'re coasting.'
+                ],
+                suggestion: 'Schedule your hardest task as the first event tomorrow at 5:30 AM. Zero warmup. Attack it cold. Your brain is sharpest before the world corrupts your focus.'
+            },
+            'exercise': {
+                title: 'EXERCISE — Physical Discipline Protocol',
+                checklist: [
+                    'Minimum 30 minutes of elevated heart rate daily. Walking doesn\'t count.',
+                    'Strength training 3x per week. Compound movements: squat, deadlift, press.',
+                    'Morning exercise > evening exercise. Sets your circadian rhythm.',
+                    'No skipping because you\'re "tired." Tired is the default. Move anyway.',
+                    'Cold shower after every workout. 2 minutes minimum. Builds mental toughness.',
+                    'Track every workout. What gets measured gets managed.'
+                ],
+                suggestion: 'Add a "Morning Training" event at 6:00 AM tomorrow. 30 min minimum. If you skip it, I\'ll know — and there will be consequences.'
+            },
+            'nutrition': {
+                title: 'NUTRITION — Fuel Protocol',
+                checklist: [
+                    'Protein with every meal. Minimum 1.6g per kg of bodyweight daily.',
+                    'No processed sugar. It\'s poison dressed as pleasure.',
+                    'Hydrate: 250ml water every 2 hours minimum. Your brain is 75% water.',
+                    'Meal prep on Sundays. Decision fatigue kills discipline.',
+                    'No eating after 8 PM. Your gut needs rest.',
+                    'If you can\'t pronounce an ingredient, don\'t eat it.'
+                ],
+                suggestion: 'Your water target is 2000ml. If you haven\'t hit it by 3 PM, you\'re behind. Set hourly water alarms. Dehydration = degraded performance.'
+            },
+            'focus': {
+                title: 'FOCUS — Mental Warfare Protocol',
+                checklist: [
+                    'Delete social media from your phone. Access only via desktop, time-boxed.',
+                    'Use website blockers during deep work. willpower is finite; systems aren\'t.',
+                    '5-minute meditation before each work block. Not optional.',
+                    'Single-task ruthlessly. Context switching costs 23 minutes per switch.',
+                    'Write down distracting thoughts on paper. Address them AFTER the work block.',
+                    'Environment design: clean desk, noise-cancelling headphones, door closed.'
+                ],
+                suggestion: 'Remove all notification badges from your phone right now. Every badge is someone else\'s agenda stealing your attention. Take control.'
+            }
+        };
+
+        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        function addCoachMessage(text, type) {
+            coachLog.push({ text, type, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+            renderCoachLog();
+        }
+
+        function renderCoachLog() {
+            const el = document.getElementById('coachLog');
+            if (!coachLog.length) {
+                el.innerHTML = '<div style="padding:20px;text-align:center;color:#4b5563;font-size:12px">The Coach is watching. Type a command or tap a quick action.</div>';
+                return;
+            }
+            el.innerHTML = coachLog.map(m => {
+                if (m.type === 'user') return `<div class="coach-msg user-cmd">${esc(m.text)}<div style="font-size:9px;color:#6b7280;margin-top:4px">${m.time}</div></div>`;
+                const typeClass = m.type || '';
+                const tagMap = { harsh: 'THE SPARTAN', motivate: 'MOTIVATION', advice: 'TACTICAL ADVICE', feedback: 'METRIC REVIEW' };
+                const tag = tagMap[m.type] || 'COACH';
+                return `<div class="coach-msg coach-resp ${typeClass}"><div class="coach-tag">${tag}</div>${m.text}<div style="font-size:9px;color:#4b5563;margin-top:4px">${m.time}</div></div>`;
+            }).join('');
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function coachCommand(cmd) {
+            addCoachMessage(cmd, 'user');
+            processCoachCommand(cmd.toLowerCase());
+        }
+
+        function sendCoachCommand() {
+            const input = document.getElementById('coachInput');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            input.value = '';
+            coachCommand(cmd);
+        }
+
+        function processCoachCommand(cmd) {
+            // MOTIVATE
+            if (cmd.includes('motivat') || cmd.includes('inspire') || cmd.includes('story') || cmd.includes('push me') || cmd.includes('fire me up')) {
+                const story = rand(MOTIVATIONAL_STORIES);
+                addCoachMessage(`<strong>${story.title}</strong><br><br>${story.text}`, 'motivate');
+                return;
+            }
+
+            // ADVICE — match specific topics
+            for (const [key, data] of Object.entries(ADVICE_DATABASE)) {
+                if (cmd.includes(key) || (key === 'sleep hygiene' && cmd.includes('sleep')) || (key === 'work density' && (cmd.includes('work') || cmd.includes('productivity') || cmd.includes('focus')))) {
+                    let html = `<strong>${data.title}</strong><br><br>`;
+                    html += '<div style="margin:8px 0">';
+                    data.checklist.forEach((item, i) => {
+                        html += `<div style="margin-bottom:6px;padding-left:12px;border-left:1px solid rgba(168,85,247,.3)"><span style="color:#a855f7;font-weight:600">${i+1}.</span> ${item}</div>`;
+                    });
+                    html += '</div>';
+                    html += `<div style="margin-top:10px;padding:8px 10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:6px;font-size:12px"><strong style="color:#a855f7">SCHEDULE CHANGE:</strong> ${data.suggestion}</div>`;
+                    addCoachMessage(html, 'advice');
+                    return;
+                }
+            }
+
+            // REVIEW METRICS
+            if (cmd.includes('review') || cmd.includes('metric') || cmd.includes('check') || cmd.includes('status') || cmd.includes('how am i')) {
+                runMetricReview();
+                return;
+            }
+
+            // GENERIC HARSH RESPONSE
+            const harshResponses = [
+                `You typed "${esc(cmd)}" like I\'m your therapist. I\'m not. I\'m the voice that tells you what you already know but refuse to act on. Water: ${metrics.water.current}ml. Sleep: ${metrics.sleep.hours || 'NOT LOGGED'}. Exercise: ${metrics.exercise.done ? 'Done' : 'NOT DONE'}. Fix what\'s broken. Now.`,
+                `I don\'t understand "${esc(cmd)}" and I don\'t care. Here\'s what I understand: you have ${events.filter(e=>e.date===formatDateKey(new Date())).length} events today. Your water is at ${metrics.water.current}ml. Stop typing. Start executing.`,
+                `"${esc(cmd)}"? That\'s not a command I respect. Try: "motivate me", "sleep hygiene", "work density", "review metrics". Or better yet — close this app and go do the work you\'re avoiding.`,
+                `Every second you spend here chatting is a second not spent on your schedule. ${metrics.exercise.done ? 'At least you exercised.' : 'You haven\'t even exercised today.'} ${metrics.water.current < 1000 ? 'And you\'re dehydrated.' : ''} Move.`
+            ];
+            addCoachMessage(rand(harshResponses), 'harsh');
+        }
+
+        function runMetricReview() {
+            const waterPct = Math.round((metrics.water.current / metrics.water.target) * 100);
+            const sleepH = metrics.sleep.hours;
+            const exerciseDone = metrics.exercise.done;
+            const todayEvents = events.filter(e => e.date === formatDateKey(new Date()));
+            let score = 0;
+            let lines = [];
+
+            // Water assessment
+            if (waterPct >= 100) { score++; lines.push(`<span style="color:#4ade80">WATER: ${metrics.water.current}ml — Target hit. Adequate. Don\'t stop.</span>`); }
+            else if (waterPct >= 50) { lines.push(`<span style="color:#fbbf24">WATER: ${metrics.water.current}ml (${waterPct}%) — You\'re halfway. Your brain is already suffering. Drink. Now.</span>`); }
+            else { lines.push(`<span style="color:#f87171">WATER: ${metrics.water.current}ml (${waterPct}%) — Pathetic. You\'re running on fumes. Every cell in your body is underperforming because you can\'t be bothered to drink water. Fix this immediately.</span>`); }
+
+            // Sleep assessment
+            if (sleepH === null) { lines.push(`<span style="color:#f87171">SLEEP: NOT LOGGED — You didn\'t even track it. If you can\'t measure it, you can\'t manage it. Log your sleep. Now.</span>`); }
+            else if (sleepH >= 7 && sleepH <= 9) { score++; lines.push(`<span style="color:#4ade80">SLEEP: ${sleepH}h — Acceptable range. Quality matters more than quantity. Were you in bed by 10 PM?</span>`); }
+            else if (sleepH >= 5) { lines.push(`<span style="color:#fbbf24">SLEEP: ${sleepH}h — Suboptimal. Under 7 hours degrades cognitive performance by 30%. You\'re voluntarily making yourself dumber.</span>`); }
+            else { lines.push(`<span style="color:#f87171">SLEEP: ${sleepH}h — Dangerous. Chronic sleep deprivation destroys testosterone, immune function, and decision-making. This isn\'t hardcore — it\'s self-destruction. Fix your sleep protocol.</span>`); }
+
+            // Exercise assessment
+            if (exerciseDone) { score++; lines.push(`<span style="color:#4ade80">EXERCISE: Done — Good. The bare minimum of physical discipline. Was it hard enough? If you weren\'t uncomfortable, it didn\'t count.</span>`); }
+            else { lines.push(`<span style="color:#f87171">EXERCISE: NOT DONE — Your body is a weapon. You\'re letting it rust. Every day without training is a day you chose weakness. Get moving.</span>`); }
+
+            // Events assessment
+            if (todayEvents.length === 0) { lines.push(`<span style="color:#f87171">SCHEDULE: Zero events today. An empty schedule isn\'t freedom — it\'s aimlessness. Build your day or your day builds you.</span>`); }
+            else { score += 0.5; lines.push(`<span style="color:#d8b4fe">SCHEDULE: ${todayEvents.length} event${todayEvents.length>1?'s':''} planned. Execution is everything. A plan means nothing if you don\'t follow through.</span>`); }
+
+            // Overall verdict
+            let verdict;
+            if (score >= 3) verdict = `<div style="margin-top:10px;padding:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px"><strong style="color:#4ade80">VERDICT:</strong> Acceptable performance. Don\'t let this make you complacent. Complacency is where discipline goes to die. Raise the standard tomorrow.</div>`;
+            else if (score >= 1.5) verdict = `<div style="margin-top:10px;padding:8px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);border-radius:6px"><strong style="color:#fbbf24">VERDICT:</strong> Mediocre. You\'re doing enough to feel good about yourself but not enough to actually improve. That\'s the most dangerous place to be. Push harder.</div>`;
+            else verdict = `<div style="margin-top:10px;padding:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px"><strong style="color:#f87171">VERDICT:</strong> Failure across the board. You have the tools. You have the time. You\'re choosing not to use them. That\'s not a limitation — it\'s a decision. Make a different one. Now.</div>`;
+
+            addCoachMessage(`<strong>METRIC REVIEW</strong><br><br>${lines.join('<br><br>')}${verdict}`, score >= 3 ? 'advice' : score >= 1.5 ? 'motivate' : 'harsh');
+        }
+
+        // 4-HOUR AUTO FEEDBACK
+        function checkAutoFeedback() {
+            const now = new Date();
+            const hour = now.getHours();
+            const feedbackHours = [8, 12, 16, 20];
+            const currentSlot = feedbackHours.find(h => hour >= h && hour < h + 1);
+
+            if (currentSlot !== undefined && lastFeedbackHour !== currentSlot) {
+                lastFeedbackHour = currentSlot;
+                const waterPct = Math.round((metrics.water.current / metrics.water.target) * 100);
+                const failingWater = waterPct < 50;
+                const failingSleep = metrics.sleep.hours !== null && metrics.sleep.hours < 6;
+                const failingExercise = !metrics.exercise.done && hour >= 16;
+
+                if (failingWater || failingSleep || failingExercise) {
+                    let msg = `<strong>${currentSlot}:00 CHECK-IN</strong><br><br>`;
+                    if (failingWater) msg += `Water at ${waterPct}%. By ${currentSlot}:00 you should be at ${Math.round((currentSlot/20)*100)}%. You\'re behind. Drink.<br><br>`;
+                    if (failingSleep) msg += `${metrics.sleep.hours}h sleep logged. You\'re impaired. Compensate with discipline, not caffeine.<br><br>`;
+                    if (failingExercise) msg += `It\'s ${currentSlot}:00 and you still haven\'t exercised. The day is running out. Your body doesn\'t care about your excuses.<br><br>`;
+                    msg += `<em>This is your ${feedbackHours.indexOf(currentSlot) + 1}${['st','nd','rd','th'][feedbackHours.indexOf(currentSlot)]} check-in of the day. I\'m watching.</em>`;
+                    addCoachMessage(msg, 'harsh');
+
+                    const banner = document.getElementById('feedbackBanner');
+                    document.getElementById('feedbackBannerText').textContent = `${currentSlot}:00 — The Coach reviewed your metrics. You\'re failing.`;
+                    banner.classList.add('show');
+                }
+            }
+        }
+
+        function dismissFeedback() {
+            document.getElementById('feedbackBanner').classList.remove('show');
+        }
+
+        // Start auto-feedback check every 60 seconds
+        setInterval(checkAutoFeedback, 60000);
+        checkAutoFeedback();
+
+        // Initialize coach log
+        renderCoachLog();
+
+        // Coach input Enter key
+        document.getElementById('coachInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendCoachCommand();
+        });
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registered:', registration))
+                    .catch(error => console.log('SW registration failed:', error));
+            });
+        }
+    </script>
 </body>
 </html>
