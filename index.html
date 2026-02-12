@@ -112,6 +112,20 @@
         .toggle-switch.on{background:#a855f7}
         .toggle-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s}
         .toggle-switch.on .toggle-knob{left:24px}
+        .context-switcher{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;background:#a855f7;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(168,85,247,.3);transition:all .3s;z-index:40}
+        .context-switcher:hover{background:#9333ea;transform:translateX(-50%) scale(1.05)}
+        .context-switcher.open{background:#000;border:2px solid #a855f7}
+        .context-menu{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0a0a0a;border:1px solid #a855f7;border-radius:12px;padding:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;z-index:39}
+        .context-menu.show{display:block;animation:slideUp .2s ease-out}
+        .context-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;cursor:pointer;transition:background .2s;color:#fff}
+        .context-item:hover{background:rgba(168,85,247,.1)}
+        .context-item.active{background:rgba(168,85,247,.2);color:#a855f7}
+        .context-item svg{width:18px;height:18px}
+        .context-item span{font-size:14px;font-weight:500}
+        .view-container{display:none;animation:fadeIn .2s ease-out}
+        .view-container.active{display:block}
+        @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     </style>
 </head>
 <body>
@@ -122,8 +136,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 </button>
                 <div>
-                    <h1 id="currentMonth">Loading...</h1>
-                    <div class="sub" id="selectedDate">Today</div>
+                    <h1 id="contextTitle">Calendar</h1>
+                    <div class="sub" id="contextSubtitle">Today</div>
                 </div>
             </div>
             <button class="icon-btn" onclick="goToToday()">
@@ -133,97 +147,92 @@
     </header>
 
     <main class="main">
-        <!-- Calendar Section -->
-        <section class="section">
-            <div class="cal-header">
-                <h2 class="section-title">Calendar</h2>
-                <div class="cal-nav">
-                    <button class="cal-btn" onclick="previousMonth()">‹</button>
-                    <button class="cal-btn" onclick="nextMonth()">›</button>
+        <!-- Calendar View -->
+        <div id="calendarView" class="view-container active">
+            <!-- Calendar Section -->
+            <section class="section">
+                <div class="cal-header">
+                    <h2 class="section-title">Calendar</h2>
+                    <div class="cal-nav">
+                        <button class="cal-btn" onclick="previousMonth()">‹</button>
+                        <button class="cal-btn" onclick="nextMonth()">›</button>
+                    </div>
                 </div>
-            </div>
-            <div class="calendar-grid" id="calendar">
-                <!-- Calendar will be rendered here -->
-            </div>
-        </section>
+                <div class="calendar-grid" id="calendar">
+                    <!-- Calendar will be rendered here -->
+                </div>
+            </section>
 
-        <!-- Events Section -->
-        <section class="section">
-            <h2 class="section-title">Events for <span id="eventsDate">Today</span></h2>
-            <div class="card">
-                <div class="events-list" id="eventsList">
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/></svg>
-                        <p>No events for this day</p>
+            <!-- Events Section -->
+            <section class="section">
+                <h2 class="section-title">Events for <span id="eventsDate">Today</span></h2>
+                <div class="card">
+                    <div class="events-list" id="eventsList">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/></svg>
+                            <p>No events for this day</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
-        <!-- Health Metrics Section -->
-        <section class="section">
-            <h2 class="section-title">Health Metrics</h2>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Water Intake</span>
-                        <span class="metric-value" id="waterValue">0ml / 2000ml</span>
+        <!-- Tasks View -->
+        <div id="tasksView" class="view-container">
+            <section class="section">
+                <h2 class="section-title">Daily Tasks</h2>
+                <div class="card">
+                    <div id="tasksList">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <p>No tasks for today</p>
+                        </div>
                     </div>
-                    <div class="metric-actions">
-                        <button class="metric-btn" onclick="addWater(250)">+250ml</button>
-                        <button class="metric-btn" onclick="addWater(500)">+500ml</button>
-                        <button class="metric-btn" onclick="resetWater()">Reset</button>
+                    <div style="margin-top:16px">
+                        <button class="fbtn fbtn-s" onclick="addTask()">Add Task</button>
                     </div>
                 </div>
+            </section>
+        </div>
 
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Sleep Duration</span>
-                        <span class="metric-value" id="sleepValue">Not set</span>
-                    </div>
-                    <div class="metric-actions">
-                        <input type="number" class="fi" id="sleepInput" placeholder="Hours" min="0" max="24" step="0.5" style="flex:1">
-                        <button class="metric-btn" onclick="setSleep()">Set</button>
-                    </div>
+        <!-- Metrics View -->
+        <div id="metricsView" class="view-container">
+            <section class="section">
+                <h2 class="section-title">Health Metrics</h2>
+                <div class="metrics-grid" id="metricsGrid">
+                    <!-- Metrics will be rendered here -->
                 </div>
+            </section>
+        </div>
 
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Exercise</span>
-                        <span class="metric-value" id="exerciseValue">Not done</span>
+        <!-- Coach View -->
+        <div id="coachView" class="view-container">
+            <section class="section">
+                <h2 class="section-title">The Coach</h2>
+                <div class="coach-section">
+                    <div class="coach-header">
+                        <div class="coach-label">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            The Coach
+                        </div>
+                        <span class="coach-status" id="coachStatus">Active</span>
                     </div>
-                    <div class="metric-actions">
-                        <button class="metric-btn" id="exerciseBtn" onclick="toggleExercise()">Mark as Done</button>
+                    <div class="coach-log" id="coachLog"></div>
+                    <div class="coach-quick">
+                        <button class="coach-quick-btn" onclick="coachCommand('motivate me')">Motivate</button>
+                        <button class="coach-quick-btn" onclick="coachCommand('sleep hygiene')">Sleep</button>
+                        <button class="coach-quick-btn" onclick="coachCommand('work density')">Work</button>
+                        <button class="coach-quick-btn" onclick="coachCommand('review metrics')">Review</button>
+                    </div>
+                    <div class="coach-input-row">
+                        <input type="text" class="coach-input" id="coachInput" placeholder="Command the Coach...">
+                        <button class="coach-send" onclick="sendCoachCommand()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2"/><polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                        </button>
                     </div>
                 </div>
-            </div>
-        </section>
-        <!-- Coach Section -->
-        <section class="section">
-            <h2 class="section-title">The Coach</h2>
-            <div class="coach-section">
-                <div class="coach-header">
-                    <div class="coach-label">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        The Spartan
-                    </div>
-                    <span class="coach-status" id="coachStatus">Active</span>
-                </div>
-                <div class="coach-log" id="coachLog"></div>
-                <div class="coach-quick">
-                    <button class="coach-quick-btn" onclick="coachCommand('motivate me')">Motivate</button>
-                    <button class="coach-quick-btn" onclick="coachCommand('sleep hygiene')">Sleep</button>
-                    <button class="coach-quick-btn" onclick="coachCommand('work density')">Work</button>
-                    <button class="coach-quick-btn" onclick="coachCommand('review metrics')">Review</button>
-                </div>
-                <div class="coach-input-row">
-                    <input type="text" class="coach-input" id="coachInput" placeholder="Command the Coach...">
-                    <button class="coach-send" onclick="sendCoachCommand()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2"/><polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-                    </button>
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </main>
 
     <!-- Feedback Banner -->
@@ -232,10 +241,46 @@
         <span id="feedbackBannerText">The Coach has words for you.</span>
     </div>
 
-    <!-- Floating Action Button -->
-    <button class="fab" onclick="openAddEvent()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/></svg>
+    <!-- Context Switcher -->
+    <button class="context-switcher" id="contextSwitcher" onclick="toggleContextMenu()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="1" stroke="currentColor" stroke-width="2" fill="currentColor"/>
+            <circle cx="12" cy="5" r="1" stroke="currentColor" stroke-width="2" fill="currentColor"/>
+            <circle cx="12" cy="19" r="1" stroke="currentColor" stroke-width="2" fill="currentColor"/>
+        </svg>
     </button>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-item active" onclick="switchContext('calendar')">
+            <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+                <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+                <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span>Calendar</span>
+        </div>
+        <div class="context-item" onclick="switchContext('tasks')">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Tasks</span>
+        </div>
+        <div class="context-item" onclick="switchContext('metrics')">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Metrics</span>
+        </div>
+        <div class="context-item" onclick="switchContext('coach')">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Coach</span>
+        </div>
+    </div>
 
     <!-- Add Event Modal -->
     <div class="overlay" id="addModal">
@@ -290,14 +335,41 @@
         };
         let selectedEventType = 'onetime';
         let enabledPlugins = { water: true, sleep: true, exercise: true };
+        
+        // Context Switching State
+        let currentContext = 'calendar';
+        let tasks = [];
+        
+        const CONTEXTS = {
+            calendar: { title: 'Calendar', subtitle: 'Today' },
+            tasks: { title: 'Tasks', subtitle: 'Daily Checklist' },
+            metrics: { title: 'Metrics', subtitle: 'Health Tracking' },
+            coach: { title: 'Coach', subtitle: 'AI Assistant' }
+        };
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
-            renderCalendar();
-            updateDateDisplay();
-            renderEvents();
-            updateMetrics();
+            
+            // Set initial context
+            document.querySelectorAll('.view-container').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(currentContext + 'View').classList.add('active');
+            
+            // Update header
+            const ctx = CONTEXTS[currentContext];
+            document.getElementById('contextTitle').textContent = ctx.title;
+            document.getElementById('contextSubtitle').textContent = ctx.subtitle;
+            
+            // Update context menu
+            document.querySelectorAll('.context-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.context-item[onclick*="${currentContext}"]`).classList.add('active');
+            
+            // Render initial content
+            renderContextContent(currentContext);
         });
 
         // Data Persistence
@@ -305,16 +377,22 @@
             const storedEvents = localStorage.getItem('routine-os-events');
             const storedMetrics = localStorage.getItem('routine-os-metrics');
             const storedPlugins = localStorage.getItem('routine-os-plugins');
+            const storedTasks = localStorage.getItem('routine-os-tasks');
+            const storedContext = localStorage.getItem('routine-os-context');
             
             if (storedEvents) events = JSON.parse(storedEvents);
             if (storedMetrics) metrics = JSON.parse(storedMetrics);
             if (storedPlugins) enabledPlugins = JSON.parse(storedPlugins);
+            if (storedTasks) tasks = JSON.parse(storedTasks);
+            if (storedContext) currentContext = storedContext;
         }
 
         function saveData() {
             localStorage.setItem('routine-os-events', JSON.stringify(events));
             localStorage.setItem('routine-os-metrics', JSON.stringify(metrics));
             localStorage.setItem('routine-os-plugins', JSON.stringify(enabledPlugins));
+            localStorage.setItem('routine-os-tasks', JSON.stringify(tasks));
+            localStorage.setItem('routine-os-context', currentContext);
         }
 
         // Calendar Functions
@@ -483,7 +561,7 @@
 
         // Health Metrics Functions
         function renderMetrics() {
-            const container = document.querySelector('.metrics-grid');
+            const container = document.getElementById('metricsGrid');
             let html = '';
 
             if (enabledPlugins.water) {
@@ -610,6 +688,123 @@
             renderMetrics();
         }
 
+        // Context Switching Functions
+        function toggleContextMenu() {
+            const menu = document.getElementById('contextMenu');
+            const switcher = document.getElementById('contextSwitcher');
+            const isOpen = menu.classList.contains('show');
+            
+            if (isOpen) {
+                menu.classList.remove('show');
+                switcher.classList.remove('open');
+            } else {
+                menu.classList.add('show');
+                switcher.classList.add('open');
+            }
+        }
+
+        function switchContext(context) {
+            // Update state
+            currentContext = context;
+            saveData();
+            
+            // Update views
+            document.querySelectorAll('.view-container').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(context + 'View').classList.add('active');
+            
+            // Update menu
+            document.querySelectorAll('.context-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Update header
+            const ctx = CONTEXTS[context];
+            document.getElementById('contextTitle').textContent = ctx.title;
+            document.getElementById('contextSubtitle').textContent = ctx.subtitle;
+            
+            // Close menu
+            toggleContextMenu();
+            
+            // Render context-specific content
+            renderContextContent(context);
+        }
+
+        function renderContextContent(context) {
+            switch(context) {
+                case 'calendar':
+                    renderCalendar();
+                    renderEvents();
+                    updateDateDisplay();
+                    break;
+                case 'tasks':
+                    renderTasks();
+                    break;
+                case 'metrics':
+                    renderMetrics();
+                    break;
+                case 'coach':
+                    renderCoachLog();
+                    break;
+            }
+        }
+
+        // Tasks Functions
+        function renderTasks() {
+            const container = document.getElementById('tasksList');
+            const todayTasks = tasks.filter(task => task.date === formatDateKey(new Date()));
+            
+            if (todayTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <p>No tasks for today</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = todayTasks.map(task => `
+                <div class="event-item">
+                    <div class="event-info">
+                        <div class="event-title">${task.completed ? '<s>' + task.title + '</s>' : task.title}</div>
+                        ${task.description ? `<div class="event-type">${task.description}</div>` : ''}
+                    </div>
+                    <button class="del-btn" onclick="toggleTask('${task.id}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">${task.completed ? '<path d="M3 12h18" stroke="currentColor" stroke-width="2"/>' : '<path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'}</svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addTask() {
+            const title = prompt('Enter task title:');
+            if (!title) return;
+            
+            const task = {
+                id: Date.now().toString(),
+                title,
+                description: '',
+                completed: false,
+                date: formatDateKey(new Date())
+            };
+            
+            tasks.push(task);
+            saveData();
+            renderTasks();
+        }
+
+        function toggleTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                saveData();
+                renderTasks();
+            }
+        }
+
         // Settings
         function openSettings() {
             renderPluginToggles();
@@ -626,6 +821,15 @@
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) closeAll();
             });
+        });
+
+        // Close context menu on outside click
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('contextMenu');
+            const switcher = document.getElementById('contextSwitcher');
+            if (!menu.contains(e.target) && !switcher.contains(e.target) && menu.classList.contains('show')) {
+                toggleContextMenu();
+            }
         });
 
         // ============================================================
