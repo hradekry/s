@@ -112,9 +112,7 @@
         .toggle-switch.on{background:#a855f7}
         .toggle-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s}
         .toggle-switch.on .toggle-knob{left:24px}
-        .context-switcher{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;background:#a855f7;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(168,85,247,.3);transition:all .3s;z-index:40}
-        .context-switcher:hover{background:#9333ea;transform:translateX(-50%) scale(1.05)}
-        .context-switcher svg{width:22px;height:22px}
+        .context-switcher svg{width:20px;height:20px}
         .view-container{display:none;animation:fadeIn .2s ease-out}
         .view-container.active{display:block}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -132,8 +130,8 @@
                     <div class="sub" id="contextSubtitle">Today</div>
                 </div>
             </div>
-            <button class="icon-btn" onclick="goToToday()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/></svg>
+            <button class="icon-btn context-switcher" id="contextSwitcher" onclick="cycleContext()" aria-label="Switch context">
+                <svg id="contextIcon" viewBox="0 0 24 24" fill="none"></svg>
             </button>
         </div>
     </header>
@@ -143,9 +141,6 @@
         <div id="calendarView" class="view-container active">
             <!-- Calendar Section -->
             <section class="section">
-                <div class="cal-header">
-                    <h2 class="section-title">Calendar</h2>
-                </div>
                 <div class="calendar-grid" id="calendar">
                     <!-- Calendar will be rendered here -->
                 </div>
@@ -228,11 +223,6 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 7l4-4 4 4-4 4" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span id="feedbackBannerText">The Coach has words for you.</span>
     </div>
-
-    <!-- Context Switcher -->
-    <button class="context-switcher" id="contextSwitcher" onclick="cycleContext()" aria-label="Switch context">
-        <svg id="contextIcon" viewBox="0 0 24 24" fill="none"></svg>
-    </button>
 
     <!-- Add Event Modal -->
     <div class="overlay" id="addModal">
