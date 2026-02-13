@@ -381,6 +381,16 @@
             document.getElementById('contextSubtitle').textContent = ctx.subtitle;
             document.getElementById('contextIcon').innerHTML = ctx.icon;
             
+            // Restore selected date if available
+            const storedSelectedDate = localStorage.getItem('routine-os-selected-date');
+            if (storedSelectedDate) {
+                const parsedDate = new Date(storedSelectedDate);
+                if (!isNaN(parsedDate.getTime())) {
+                    selectedDate = parsedDate;
+                    currentDate = new Date(parsedDate);
+                }
+            }
+
             // Render initial content
             renderContextContent(currentContext);
         });
@@ -392,6 +402,7 @@
                 const storedMetrics = localStorage.getItem('routine-os-metrics');
                 const storedTasks = localStorage.getItem('routine-os-tasks');
                 const storedContext = localStorage.getItem('routine-os-context');
+                const storedSelectedDate = localStorage.getItem('routine-os-selected-date');
                 const storedAlarms = localStorage.getItem('routine-os-alarms');
                 
                 if (storedEvents) {
@@ -420,6 +431,13 @@
                 if (storedContext) {
                     currentContext = storedContext;
                 }
+                if (storedSelectedDate) {
+                    const parsedDate = new Date(storedSelectedDate);
+                    if (!isNaN(parsedDate.getTime())) {
+                        selectedDate = parsedDate;
+                        currentDate = new Date(parsedDate);
+                    }
+                }
                 
                 console.log('Data loaded successfully:', { events: events.length, tasks: tasks.length, metrics, context: currentContext });
             } catch (error) {
@@ -443,6 +461,7 @@
                 localStorage.setItem('routine-os-metrics', JSON.stringify(metrics));
                 localStorage.setItem('routine-os-tasks', JSON.stringify(tasks));
                 localStorage.setItem('routine-os-context', currentContext);
+                localStorage.setItem('routine-os-selected-date', selectedDate.toISOString());
                 
                 // Also save a backup with timestamp
                 const backup = {
