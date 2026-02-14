@@ -43,6 +43,14 @@
         .event-title{font-size:14px;color:#fff;font-weight:500;margin-bottom:2px}
         .event-type{font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px}
         .del-btn{min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;background:rgba(239,68,68,.08);border:0.5px solid rgba(239,68,68,.3);color:#ef4444;cursor:pointer;border-radius:6px;transition:all .2s}.del-btn:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.6)}
+        .setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+        .setting-row:last-child{border-bottom:none}
+        .toggle{position:relative;display:inline-block;width:44px;height:24px}
+        .toggle input{opacity:0;width:0;height:0}
+        .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#111;border:1px solid rgba(168,85,247,.4);transition:.2s;border-radius:999px}
+        .toggle-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;top:2px;background:#a855f7;transition:.2s;border-radius:50%}
+        .toggle input:checked + .toggle-slider{background:rgba(168,85,247,.2)}
+        .toggle input:checked + .toggle-slider:before{transform:translateX(20px)}
         .metrics-grid{display:grid;grid-template-columns:1fr;gap:16px}
         .metric-card{background:#0a0a0a;border:0.5px solid rgba(168,85,247,.5);border-radius:12px;padding:16px;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.15)}
         .metric-card:hover{border-color:#d8b4fe;box-shadow:0 4px 12px rgba(168,85,247,.15)}
@@ -223,6 +231,31 @@
                     </div>
                 </div>
             </section>
+            <section class="section">
+                <h2 class="section-title">Quiet Mode</h2>
+                <div class="card">
+                    <div class="setting-row">
+                        <div>
+                            <div style="font-size:13px;font-weight:600;">Notifications</div>
+                            <div style="font-size:11px;color:#9ca3af;">Allow system notifications</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="settingNotifications" onchange="toggleSetting('notifications', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <div>
+                            <div style="font-size:13px;font-weight:600;">Alarms</div>
+                            <div style="font-size:11px;color:#9ca3af;">Allow alarm sound</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="settingAlarms" onchange="toggleSetting('alarms', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -253,6 +286,19 @@
                     <div class="fg"><label class="fl">Description</label><textarea class="ft" id="eventDesc" placeholder="Optional"></textarea></div>
                     <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="eventDate"></div>
                     <div class="fg"><label class="fl">Time</label><input type="time" class="fi" id="eventTime"></div>
+                    <div class="fg">
+                        <label class="fl">Alarm Sound</label>
+                        <div class="setting-row" style="border:none;padding:6px 0">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:#a855f7;flex-shrink:0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <span style="font-size:13px;color:#d1d5db">Play alarm sound</span>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="eventAlarmToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
                     <div class="fg"><label class="fl">Type</label>
                         <div class="type-grid">
                             <button type="button" class="tbtn on" data-type="onetime" onclick="pickEventType(this)">One-time</button>
@@ -285,6 +331,13 @@
                         <label class="fl">Description (Optional)</label>
                         <textarea class="ft" id="taskDesc" placeholder="Add details..." rows="3"></textarea>
                     </div>
+                    <div class="fg">
+                        <label class="fl">Task Type</label>
+                        <div class="type-grid">
+                            <button type="button" class="tbtn on" data-type="onetime" onclick="pickTaskType(this)">One-time</button>
+                            <button type="button" class="tbtn" data-type="recurring" onclick="pickTaskType(this)">Daily</button>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-foot">
@@ -312,8 +365,11 @@
                         <textarea class="ft" id="editTaskDesc" placeholder="Add details..." rows="3"></textarea>
                     </div>
                     <div class="fg">
-                        <label class="fl">Alarm Time (Optional)</label>
-                        <input type="time" class="fi" id="editTaskAlarm">
+                        <label class="fl">Task Type</label>
+                        <div class="type-grid">
+                            <button type="button" class="tbtn on" data-type="onetime" onclick="pickEditTaskType(this)">One-time</button>
+                            <button type="button" class="tbtn" data-type="recurring" onclick="pickEditTaskType(this)">Daily</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -336,7 +392,12 @@
             exercise: { done: false }
         };
         let selectedEventType = 'onetime';
+        let selectedTaskType = 'onetime';
         let editingTaskId = null;
+        let appSettings = {
+            notificationsEnabled: true,
+            alarmsEnabled: true
+        };
         
         
         // Context Switching State
@@ -392,6 +453,12 @@
                 }
             }
 
+            // Initialize settings toggles
+            const notifToggle = document.getElementById('settingNotifications');
+            const alarmToggle = document.getElementById('settingAlarms');
+            if (notifToggle) notifToggle.checked = appSettings.notificationsEnabled;
+            if (alarmToggle) alarmToggle.checked = appSettings.alarmsEnabled;
+
             // Render initial content
             renderContextContent(currentContext);
 
@@ -402,6 +469,8 @@
             checkAutoFeedback();
             setInterval(checkAlarms, 30000);
             checkAlarms();
+            setInterval(checkEventAlarms, 30000);
+            checkEventAlarms();
             renderCoachLog();
 
             document.getElementById('coachInput').addEventListener('keypress', (e) => {
@@ -466,13 +535,14 @@
                 requestPersistentStorage();
 
                 // Try IndexedDB first, fall back to localStorage
-                let storedEvents, storedMetrics, storedTasks, storedContext, storedSelectedDate;
+                let storedEvents, storedMetrics, storedTasks, storedContext, storedSelectedDate, storedSettings;
                 try {
                     storedEvents = await idbGet('routine-os-events');
                     storedMetrics = await idbGet('routine-os-metrics');
                     storedTasks = await idbGet('routine-os-tasks');
                     storedContext = await idbGet('routine-os-context');
                     storedSelectedDate = await idbGet('routine-os-selected-date');
+                    storedSettings = await idbGet('routine-os-settings');
                 } catch (idbErr) {
                     console.warn('IndexedDB load failed, using localStorage:', idbErr);
                 }
@@ -481,12 +551,17 @@
                 if (!storedMetrics) storedMetrics = localStorage.getItem('routine-os-metrics');
                 if (!storedTasks) storedTasks = localStorage.getItem('routine-os-tasks');
                 if (!storedContext) storedContext = localStorage.getItem('routine-os-context');
-                if (!storedSelectedDate) storedSelectedDate = localStorage.getItem('routine-os-selected-date');
+                if (!storedSettings) storedSettings = localStorage.getItem('routine-os-settings');
                 
                 if (storedEvents) {
                     events = JSON.parse(storedEvents);
                     // Validate and clean events data
                     events = events.filter(e => e && e.id && e.title && e.date);
+                    events.forEach(event => {
+                        if (typeof event.alarmEnabled !== 'boolean') event.alarmEnabled = false;
+                        if (!event.alarmTimestamp) event.alarmTimestamp = null;
+                        if (typeof event.alarmNotified !== 'boolean') event.alarmNotified = false;
+                    });
                 }
                 if (storedMetrics) {
                     metrics = JSON.parse(storedMetrics);
@@ -504,6 +579,7 @@
                         if (!task.completed) task.completed = false;
                         if (!task.skippedDates) task.skippedDates = [];
                         if (!task.description) task.description = '';
+                        if (!task.type) task.type = 'onetime';
                     });
                 }
                 if (storedContext) {
@@ -515,6 +591,13 @@
                         selectedDate = parsedDate;
                         currentDate = new Date(parsedDate);
                     }
+                }
+                if (storedSettings) {
+                    const parsedSettings = JSON.parse(storedSettings);
+                    appSettings = {
+                        notificationsEnabled: parsedSettings.notificationsEnabled !== false,
+                        alarmsEnabled: parsedSettings.alarmsEnabled !== false
+                    };
                 }
                 
                 console.log('Data loaded successfully:', { events: events.length, tasks: tasks.length, metrics, context: currentContext });
@@ -542,6 +625,7 @@
                 localStorage.setItem('routine-os-tasks', JSON.stringify(tasks));
                 localStorage.setItem('routine-os-context', currentContext);
                 localStorage.setItem('routine-os-selected-date', selectedDate.toISOString());
+                localStorage.setItem('routine-os-settings', JSON.stringify(appSettings));
             } catch (e) {
                 console.warn('localStorage save failed:', e);
             }
@@ -557,7 +641,8 @@
                     idbSet('routine-os-metrics', meJson),
                     idbSet('routine-os-tasks', taJson),
                     idbSet('routine-os-context', currentContext),
-                    idbSet('routine-os-selected-date', sdJson)
+                    idbSet('routine-os-selected-date', sdJson),
+                    idbSet('routine-os-settings', JSON.stringify(appSettings))
                 ]).catch(err => console.warn('IndexedDB save failed:', err));
             } catch (e) {
                 console.warn('IndexedDB save skipped:', e);
@@ -578,6 +663,50 @@
                 renderContextContent(currentContext);
             }
         });
+
+        function toggleSetting(key, value) {
+            if (key === 'notifications') appSettings.notificationsEnabled = value;
+            if (key === 'alarms') appSettings.alarmsEnabled = value;
+            if (key === 'notifications' && value) requestNotificationPermission();
+            saveData();
+        }
+
+        let alarmAudioCtx = null;
+        let alarmInterval = null;
+
+        function playAlarmSound() {
+            if (!appSettings.alarmsEnabled) return;
+            stopAlarmSound();
+            try {
+                alarmAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (alarmAudioCtx.state === 'suspended') alarmAudioCtx.resume();
+                let beepCount = 0;
+                const maxBeeps = 8;
+                function beep() {
+                    if (beepCount >= maxBeeps || !alarmAudioCtx) { stopAlarmSound(); return; }
+                    const osc = alarmAudioCtx.createOscillator();
+                    const gain = alarmAudioCtx.createGain();
+                    osc.type = beepCount % 2 === 0 ? 'square' : 'sine';
+                    osc.frequency.value = beepCount % 2 === 0 ? 880 : 660;
+                    gain.gain.value = 0.35;
+                    gain.gain.setTargetAtTime(0, alarmAudioCtx.currentTime + 0.25, 0.05);
+                    osc.connect(gain);
+                    gain.connect(alarmAudioCtx.destination);
+                    osc.start();
+                    osc.stop(alarmAudioCtx.currentTime + 0.3);
+                    beepCount++;
+                }
+                beep();
+                alarmInterval = setInterval(beep, 500);
+            } catch (e) {
+                console.warn('Alarm sound failed:', e);
+            }
+        }
+
+        function stopAlarmSound() {
+            if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
+            if (alarmAudioCtx) { alarmAudioCtx.close().catch(() => {}); alarmAudioCtx = null; }
+        }
 
         // Calendar Functions
         function renderCalendar() {
@@ -715,16 +844,40 @@
             const etf = document.getElementById('editTaskForm');
             if (etf) etf.reset();
             selectedEventType = 'onetime';
-            const allTbtn = document.querySelectorAll('.tbtn');
-            allTbtn.forEach(b => b.classList.remove('on'));
-            const defaultBtn = document.querySelector('.tbtn[data-type="onetime"]');
-            if (defaultBtn) defaultBtn.classList.add('on');
+            selectedTaskType = 'onetime';
+            document.querySelectorAll('#eventForm .tbtn').forEach(b => b.classList.remove('on'));
+            const defaultEventBtn = document.querySelector('#eventForm .tbtn[data-type="onetime"]');
+            if (defaultEventBtn) defaultEventBtn.classList.add('on');
+            document.querySelectorAll('#taskForm .tbtn').forEach(b => b.classList.remove('on'));
+            const defaultTaskBtn = document.querySelector('#taskForm .tbtn[data-type="onetime"]');
+            if (defaultTaskBtn) defaultTaskBtn.classList.add('on');
+            document.querySelectorAll('#editTaskForm .tbtn').forEach(b => b.classList.remove('on'));
+            const defaultEditTaskBtn = document.querySelector('#editTaskForm .tbtn[data-type="onetime"]');
+            if (defaultEditTaskBtn) defaultEditTaskBtn.classList.add('on');
         }
 
         function pickEventType(btn) {
             selectedEventType = btn.dataset.type;
-            document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('on'));
+            document.querySelectorAll('#eventForm .tbtn').forEach(b => b.classList.remove('on'));
             btn.classList.add('on');
+        }
+
+        function pickTaskType(btn) {
+            selectedTaskType = btn.dataset.type;
+            document.querySelectorAll('#taskForm .tbtn').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+        }
+
+        function pickEditTaskType(btn) {
+            if (!editingTaskId) return;
+            const modal = document.getElementById('editTaskForm');
+            modal.querySelectorAll('.tbtn').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+        }
+
+        function getSelectedType(formSelector) {
+            const active = document.querySelector(`${formSelector} .tbtn.on`);
+            return active ? active.dataset.type : 'onetime';
         }
 
         function saveEvent() {
@@ -740,13 +893,30 @@
                 eventDate = formatDateKey(selectedDate);
             }
 
+            const eventTime = document.getElementById('eventTime').value;
+            const alarmEnabled = document.getElementById('eventAlarmToggle').checked;
+            let alarmTimestamp = null;
+            let alarmNotified = false;
+            if (eventTime) {
+                const [h, m] = eventTime.split(':').map(v => parseInt(v, 10));
+                const now = new Date();
+                const alarmDate = new Date(eventDate);
+                alarmDate.setHours(h, m, 0, 0);
+                if (alarmDate <= now) alarmDate.setDate(alarmDate.getDate() + 1);
+                alarmTimestamp = alarmDate.getTime();
+                if (appSettings.notificationsEnabled) requestNotificationPermission();
+            }
+
             const event = {
                 id: Date.now().toString(),
                 title,
                 description: document.getElementById('eventDesc').value.trim(),
-                time: document.getElementById('eventTime').value,
+                time: eventTime,
                 type: selectedEventType,
-                date: eventDate
+                date: eventDate,
+                alarmEnabled: !!alarmEnabled,
+                alarmTimestamp,
+                alarmNotified
             };
 
             events.push(event);
@@ -890,7 +1060,7 @@
         function renderTasks() {
             const container = document.getElementById('tasksList');
             const today = formatDateKey(new Date());
-            const todayTasks = tasks.filter(task => task.date === today);
+            const todayTasks = tasks.filter(task => task.date === today || task.type === 'recurring');
             
             if (todayTasks.length === 0) {
                 container.innerHTML = `
@@ -907,12 +1077,14 @@
                 const taskClass = skipped ? 'task-skipped' : task.completed ? 'task-done' : '';
                 const statusClass = skipped ? 'skipped' : task.completed ? 'completed' : 'active';
                 const statusText = skipped ? 'Skipped' : task.completed ? 'Completed' : 'Active';
+                const isSkipped = skipped;
                 return `
                 <div class="event-item ${taskClass}">
-                    <div class="event-info">
-                        <div class="event-title">${task.title}</div>
-                        ${task.description ? `<div class="event-type">${task.description}</div>` : ''}
-                        <span class="task-status ${statusClass}">${statusText}</span>
+                    <div class="task-content">
+                        <div class="task-title">${task.title}</div>
+                        ${task.type === 'recurring' ? '<div class="task-meta">Daily</div>' : ''}
+                        ${task.description ? `<div class="task-desc">${task.description}</div>` : ''}
+                        ${isSkipped ? '<span class="badge badge-skip">Skipped</span>' : ''}
                     </div>
                     <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
                         <button class="del-btn" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3);color:#60a5fa" onclick="openEditTask('${task.id}')" title="Edit">
@@ -936,6 +1108,10 @@
             document.getElementById('taskModal').classList.add('open');
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDesc').value = '';
+            selectedTaskType = 'onetime';
+            document.querySelectorAll('#taskForm .tbtn').forEach(b => b.classList.remove('on'));
+            const defaultTaskBtn = document.querySelector('#taskForm .tbtn[data-type="onetime"]');
+            if (defaultTaskBtn) defaultTaskBtn.classList.add('on');
             document.getElementById('taskTitle').focus();
         }
 
@@ -945,13 +1121,17 @@
                 alert('Please enter a task title');
                 return;
             }
-            
+
+            const taskType = getSelectedType('#taskForm');
+            const taskDate = taskType === 'recurring' ? formatDateKey(new Date()) : formatDateKey(new Date());
+
             const task = {
                 id: Date.now().toString(),
                 title,
                 description: document.getElementById('taskDesc').value.trim(),
                 completed: false,
-                date: formatDateKey(new Date())
+                date: taskDate,
+                type: taskType
             };
             
             tasks.push(task);
@@ -997,7 +1177,9 @@
             editingTaskId = taskId;
             document.getElementById('editTaskTitle').value = task.title || '';
             document.getElementById('editTaskDesc').value = task.description || '';
-            document.getElementById('editTaskAlarm').value = task.alarmTime || '';
+            document.querySelectorAll('#editTaskForm .tbtn').forEach(b => b.classList.remove('on'));
+            const selectedBtn = document.querySelector(`#editTaskForm .tbtn[data-type="${task.type || 'onetime'}"]`);
+            if (selectedBtn) selectedBtn.classList.add('on');
             document.getElementById('editTaskModal').classList.add('open');
             document.getElementById('editTaskTitle').focus();
         }
@@ -1011,26 +1193,12 @@
                 return;
             }
             const desc = document.getElementById('editTaskDesc').value.trim();
-            const alarmTime = document.getElementById('editTaskAlarm').value;
+            const taskType = getSelectedType('#editTaskForm');
 
             task.title = title;
             task.description = desc;
 
-            if (alarmTime) {
-                const [h, m] = alarmTime.split(':').map(v => parseInt(v, 10));
-                const now = new Date();
-                const alarmDate = new Date();
-                alarmDate.setHours(h, m, 0, 0);
-                if (alarmDate <= now) alarmDate.setDate(alarmDate.getDate() + 1);
-                task.alarmTime = alarmTime;
-                task.alarmTimestamp = alarmDate.getTime();
-                task.alarmFired = false;
-                task.date = formatDateKey(alarmDate);
-            } else {
-                delete task.alarmTime;
-                delete task.alarmTimestamp;
-                delete task.alarmFired;
-            }
+            task.type = taskType;
 
             saveData();
             renderTasks();
@@ -1344,6 +1512,36 @@
             const now = Date.now();
             tasks.filter(t => t.alarmTimestamp && !t.alarmFired && t.alarmTimestamp <= now).forEach(fireAlarm);
             tasks = tasks.filter(t => !t.alarmFired || !t.alarmTimestamp || (now - t.alarmTimestamp) < 86400000);
+            saveData();
+        }
+
+        function fireEventAlarm(event) {
+            event.alarmNotified = true;
+            saveData();
+            const body = `${event.title}${event.time ? ` — ${event.time}` : ''}`;
+            if (appSettings.notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
+                new Notification('Routine OS Event', { body });
+            }
+            if (event.alarmEnabled && appSettings.alarmsEnabled) {
+                playAlarmSound();
+            }
+            addCoachMessage(`<strong>EVENT</strong><br>${body}`, 'advice');
+        }
+
+        function checkEventAlarms() {
+            const now = Date.now();
+            events.forEach(event => {
+                if (!event.alarmTimestamp) return;
+                if (!event.alarmNotified && event.alarmTimestamp <= now) {
+                    fireEventAlarm(event);
+                }
+                if (event.type === 'recurring' && event.alarmTimestamp <= now) {
+                    const next = new Date(event.alarmTimestamp);
+                    next.setDate(next.getDate() + 1);
+                    event.alarmTimestamp = next.getTime();
+                    event.alarmNotified = false;
+                }
+            });
             saveData();
         }
 
